@@ -17,30 +17,21 @@ margin:0;
 background:#f4f6fa;
 }
 
-/* HEADER */
-
-header{
-background:#1f2d3d;
-color:white;
-padding:20px;
-text-align:center;
-}
-
 /* SIDEBAR */
 
 .sidebar{
 position:fixed;
-top:0;
 left:0;
-width:220px;
+top:0;
+width:230px;
 height:100%;
 background:#2f4050;
 color:white;
 padding:20px;
 }
 
-.sidebar h3{
-color:#ddd;
+.sidebar h2{
+margin-top:0;
 }
 
 .sidebar ul{
@@ -55,25 +46,26 @@ margin:15px 0;
 /* MAIN */
 
 .main{
-margin-left:240px;
+margin-left:250px;
 padding:20px;
 }
 
-/* CONTROLS */
+/* HEADER */
 
-.controls{
-margin-bottom:20px;
-display:flex;
-gap:10px;
+header{
+background:#1f2d3d;
+color:white;
+padding:20px;
+border-radius:8px;
 }
 
-/* KPI CARDS */
+/* KPI */
 
 .kpi-grid{
 display:grid;
 grid-template-columns:repeat(6,1fr);
 gap:15px;
-margin-bottom:30px;
+margin-top:20px;
 }
 
 .kpi{
@@ -83,19 +75,33 @@ color:white;
 text-align:center;
 }
 
-.kpi-total{background:#3498db;}
-.kpi-rupture{background:#e74c3c;}
-.kpi-surstock{background:#f39c12;}
-.kpi-action{background:#27ae60;}
-.kpi-service{background:#9b59b6;}
-.kpi-security{background:#16a085;}
+.kpi1{background:#3498db;}
+.kpi2{background:#e74c3c;}
+.kpi3{background:#f39c12;}
+.kpi4{background:#27ae60;}
+.kpi5{background:#9b59b6;}
+.kpi6{background:#16a085;}
 
-/* TABLE */
+/* ANALYTICS GRID */
+
+.analytics{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-top:30px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+/* KPI TABLE */
 
 table{
 width:100%;
 border-collapse:collapse;
-background:white;
 }
 
 th{
@@ -109,31 +115,15 @@ padding:10px;
 border-bottom:1px solid #ddd;
 }
 
+/* INVENTORY */
+
+.inventory{
+margin-top:40px;
+}
+
 .status-ok{color:green;font-weight:bold;}
 .status-risk{color:red;font-weight:bold;}
-.status-surstock{color:#e67e22;font-weight:bold;}
-
-/* CHART AREA */
-
-.charts{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-margin-top:30px;
-}
-
-.chart-box{
-background:white;
-padding:20px;
-border-radius:10px;
-}
-
-.workflow{
-background:white;
-margin-top:30px;
-padding:20px;
-border-radius:10px;
-}
+.status-sur{color:#e67e22;font-weight:bold;}
 
 </style>
 
@@ -147,9 +137,9 @@ border-radius:10px;
 
 <ul>
 <li>Dashboard</li>
-<li>Inventaire</li>
-<li>Analyse</li>
-<li>Réapprovisionnement</li>
+<li>Analytics</li>
+<li>Orders</li>
+<li>Inventory</li>
 </ul>
 
 </div>
@@ -160,7 +150,7 @@ border-radius:10px;
 
 <h1>WarehouseOps Dashboard</h1>
 
-<div>Version actuelle : <b>V2.0</b></div>
+<div>Version actuelle : <b>V2.1</b></div>
 
 Utilisateur :
 
@@ -171,46 +161,124 @@ Utilisateur :
 
 </header>
 
-<div class="controls">
-
 <input type="file" id="excelFile">
-<input type="text" id="searchBox" placeholder="Recherche SKU">
-
-</div>
 
 <div class="kpi-grid">
 
-<div class="kpi kpi-total">
+<div class="kpi kpi1">
 <h2 id="totalSKU">0</h2>
-<p>Total SKU</p>
+Total SKU
 </div>
 
-<div class="kpi kpi-rupture">
+<div class="kpi kpi2">
 <h2 id="rupture">0</h2>
-<p>Ruptures</p>
+Ruptures
 </div>
 
-<div class="kpi kpi-surstock">
+<div class="kpi kpi3">
 <h2 id="surstock">0</h2>
-<p>Surstockage</p>
+Surstockage
 </div>
 
-<div class="kpi kpi-action">
+<div class="kpi kpi4">
 <h2 id="actions">0</h2>
-<p>Actions achat</p>
+Actions Achat
 </div>
 
-<div class="kpi kpi-service">
-<h2 id="serviceLevel">0%</h2>
-<p>Service Level</p>
+<div class="kpi kpi5">
+<h2 id="service">0%</h2>
+Service Level
 </div>
 
-<div class="kpi kpi-security">
-<h2 id="securityStock">0</h2>
-<p>Stock sécurité</p>
+<div class="kpi kpi6">
+<h2 id="security">0</h2>
+Stock Sécurité
 </div>
 
 </div>
+
+<!-- ANALYTICS -->
+
+<div class="analytics">
+
+<div class="card">
+
+<h3>Orders / Actions Achat</h3>
+
+<table>
+
+<tr>
+<th>Indicateur</th>
+<th>Valeur</th>
+</tr>
+
+<tr>
+<td>Commandes à passer</td>
+<td id="actions2">0</td>
+</tr>
+
+<tr>
+<td>Ruptures critiques</td>
+<td id="rupture2">0</td>
+</tr>
+
+</table>
+
+</div>
+
+<div class="card">
+
+<h3>Inventory Analytics</h3>
+
+<canvas id="inventoryChart"></canvas>
+
+</div>
+
+<div class="card">
+
+<h3>KPI Performance</h3>
+
+<table>
+
+<tr>
+<th>Métrique</th>
+<th>Valeur</th>
+</tr>
+
+<tr>
+<td>Taux service</td>
+<td id="service2">0%</td>
+</tr>
+
+<tr>
+<td>Surstock</td>
+<td id="surstock2">0</td>
+</tr>
+
+<tr>
+<td>SKU total</td>
+<td id="sku2">0</td>
+</tr>
+
+</table>
+
+</div>
+
+<div class="card">
+
+<h3>Volume logistique</h3>
+
+<canvas id="volumeChart"></canvas>
+
+</div>
+
+</div>
+
+<!-- INVENTORY TABLE -->
+
+<div class="inventory">
+
+<h2>Inventaire détaillé</h2>
 
 <table id="inventoryTable">
 
@@ -222,9 +290,9 @@ Utilisateur :
 <th>Description</th>
 <th>Stock</th>
 <th>Net disponible</th>
-<th>Reorder Point</th>
-<th>Classe ABC</th>
-<th>Message action</th>
+<th>Reorder</th>
+<th>ABC</th>
+<th>Status</th>
 
 </tr>
 
@@ -234,28 +302,6 @@ Utilisateur :
 
 </table>
 
-<div class="charts">
-
-<div class="chart-box">
-
-<canvas id="statusChart"></canvas>
-
-</div>
-
-<div class="chart-box">
-
-<canvas id="stockChart"></canvas>
-
-</div>
-
-</div>
-
-<div class="workflow">
-
-<h3>Workflow réapprovisionnement</h3>
-
-Stock faible → Analyse acheteur → Commande fournisseur → Réception entrepôt → Mise à jour inventaire
-
 </div>
 
 </div>
@@ -263,15 +309,13 @@ Stock faible → Analyse acheteur → Commande fournisseur → Réception entrep
 <script>
 
 let dataset=[]
-let statusChart
-let stockChart
+let inventoryChart
+let volumeChart
 
 document.getElementById("excelFile").addEventListener("change",loadFile)
-document.getElementById("searchBox").addEventListener("input",filterData)
 
 function loadFile(e){
 
-const file=e.target.files[0]
 const reader=new FileReader()
 
 reader.onload=function(evt){
@@ -286,15 +330,7 @@ processData(dataset)
 
 }
 
-reader.readAsArrayBuffer(file)
-
-}
-
-function classifyABC(stock){
-
-if(stock<100)return "A"
-if(stock<500)return "B"
-return "C"
+reader.readAsArrayBuffer(e.target.files[0])
 
 }
 
@@ -303,7 +339,7 @@ function processData(data){
 let rupture=0
 let surstock=0
 let actions=0
-let securityTotal=0
+let security=0
 
 const tbody=document.querySelector("#inventoryTable tbody")
 tbody.innerHTML=""
@@ -319,7 +355,7 @@ let className="status-ok"
 
 if(net<reorder){
 
-status="Réapprovisionnement requis"
+status="Réapprovisionnement"
 className="status-risk"
 
 rupture++
@@ -329,29 +365,25 @@ actions++
 
 else if(stock>reorder*2){
 
-status="Surstockage"
-className="status-surstock"
+status="Surstock"
+className="status-sur"
 
 surstock++
 
 }
 
-let abc=classifyABC(stock)
-
-securityTotal+=reorder
+security+=reorder
 
 let row=document.createElement("tr")
 
 row.innerHTML=`
-
 <td>${item.sku}</td>
 <td>${item.description}</td>
 <td>${stock}</td>
 <td>${net}</td>
 <td>${reorder}</td>
-<td>${abc}</td>
+<td>-</td>
 <td class="${className}">${status}</td>
-
 `
 
 tbody.appendChild(row)
@@ -365,40 +397,45 @@ document.getElementById("totalSKU").innerText=total
 document.getElementById("rupture").innerText=rupture
 document.getElementById("surstock").innerText=surstock
 document.getElementById("actions").innerText=actions
-document.getElementById("serviceLevel").innerText=service+"%"
-document.getElementById("securityStock").innerText=securityTotal
+document.getElementById("service").innerText=service+"%"
+document.getElementById("security").innerText=security
 
-updateCharts(rupture,surstock,total)
+document.getElementById("actions2").innerText=actions
+document.getElementById("rupture2").innerText=rupture
+document.getElementById("service2").innerText=service+"%"
+document.getElementById("surstock2").innerText=surstock
+document.getElementById("sku2").innerText=total
 
-}
-
-function filterData(){
-
-let search=document.getElementById("searchBox").value.toLowerCase()
-
-let filtered=dataset.filter(i=>
-(i.sku+" "+i.description).toLowerCase().includes(search)
-)
-
-processData(filtered)
+drawCharts(rupture,surstock,total)
 
 }
 
-function updateCharts(rupture,surstock,total){
+function drawCharts(rupture,surstock,total){
 
 let ok=total-rupture-surstock
 
-if(statusChart)statusChart.destroy()
+if(inventoryChart)inventoryChart.destroy()
 
-statusChart=new Chart(document.getElementById("statusChart"),{
+inventoryChart=new Chart(document.getElementById("inventoryChart"),{
 
-type:"doughnut",
+type:"pie",
 
 data:{
 labels:["OK","Rupture","Surstock"],
-datasets:[{
-data:[ok,rupture,surstock]
-}]
+datasets:[{data:[ok,rupture,surstock]}]
+}
+
+})
+
+if(volumeChart)volumeChart.destroy()
+
+volumeChart=new Chart(document.getElementById("volumeChart"),{
+
+type:"bar",
+
+data:{
+labels:["Rupture","Surstock","OK"],
+datasets:[{data:[rupture,surstock,ok]}]
 }
 
 })
