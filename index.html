@@ -2,160 +2,156 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>WarehouseOps V2.6</title>
+<title>WarehouseOps V2.7 Final</title>
 
+<!-- LIBS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX",
+  projectId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+window.auth = getAuth(app);
+window.db = getFirestore(app);
+window.collection = collection;
+window.addDoc = addDoc;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+</script>
 
 <style>
 body { margin:0; font-family:Arial; display:flex; }
 
 /* SIDEBAR */
 .sidebar {
-  width:240px;
+  width:250px;
   background:#1e293b;
   color:white;
-  height:100vh;
   padding:15px;
 }
-
-.menu-block {
-  background:#334155;
-  margin:10px 0;
+.menu {
   padding:12px;
-  border-radius:10px;
+  margin:10px 0;
+  border-radius:8px;
   cursor:pointer;
-  transition:0.3s;
 }
-
-.menu-block:hover { background:#475569; }
+.menu:hover { background:#334155; }
 
 .dashboard { border-left:5px solid #3b82f6; }
 .articles { border-left:5px solid #22c55e; }
 .po { border-left:5px solid #f59e0b; }
-.process { border-left:5px solid #ef4444; }
+.uml { border-left:5px solid #ef4444; }
 
 .content { flex:1; padding:20px; }
 
+/* KPI */
+.kpi { display:flex; gap:10px; }
+.card { padding:15px; border-radius:10px; color:white; flex:1; }
+.blue { background:#3b82f6; }
+.green { background:#22c55e; }
+.red { background:#ef4444; }
+
 /* TABLE */
-table { border-collapse: collapse; width:100%; }
-th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+table { width:100%; border-collapse: collapse; }
+td, th { border:1px solid #ccc; padding:8px; text-align:center; }
 
 .ok { color:green; font-weight:bold; }
 .alert { color:red; font-weight:bold; }
-
-/* KPI */
-.kpi {
-  display:flex;
-  gap:20px;
-  margin-bottom:20px;
-}
-.card {
-  padding:15px;
-  border-radius:10px;
-  color:white;
-  flex:1;
-}
-.blue { background:#3b82f6; }
-.green { background:#22c55e; }
-.orange { background:#f59e0b; }
-.red { background:#ef4444; }
-
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h2>WarehouseOps V2.6</h2>
+<h2>WarehouseOps Final</h2>
 
-  <div class="menu-block dashboard" onclick="showPage('dashboard')">📊 Tableau de bord</div>
-  <div class="menu-block articles" onclick="showPage('articles')">📦 Articles</div>
-  <div class="menu-block po" onclick="showPage('po')">🧾 Demandes achat</div>
-  <div class="menu-block process" onclick="showPage('process')">📐 Processus</div>
+<div class="menu dashboard" onclick="show('dashboard')">📊 Tableau de bord</div>
+<div class="menu articles" onclick="show('articles')">📦 Articles</div>
+<div class="menu po" onclick="show('po')">🧾 Demandes</div>
+<div class="menu uml" onclick="show('uml')">📐 UML</div>
 </div>
 
 <div class="content">
 
+<!-- LOGIN -->
+<div id="login">
+<h2>Connexion</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
 <!-- DASHBOARD -->
-<div id="dashboard">
-  <h1>📊 Tableau de bord</h1>
+<div id="dashboard" style="display:none">
+<h1>📊 Dashboard</h1>
 
-  <div class="kpi">
-    <div class="card blue" id="kpi_total"></div>
-    <div class="card green" id="kpi_ok"></div>
-    <div class="card red" id="kpi_alert"></div>
-  </div>
+<div class="kpi">
+<div class="card blue" id="kpi_total"></div>
+<div class="card green" id="kpi_ok"></div>
+<div class="card red" id="kpi_alert"></div>
+</div>
 
-  <canvas id="chart"></canvas>
+<canvas id="chart"></canvas>
 </div>
 
 <!-- ARTICLES -->
 <div id="articles" style="display:none">
-  <h1 style="color:#22c55e;">📦 Gestion Articles</h1>
+<h1>📦 Articles</h1>
 
-  <input id="sku" placeholder="SKU">
-  <input id="stock" type="number" placeholder="Stock">
-  <input id="transit" type="number" placeholder="Transit">
-  <input id="reserve" type="number" placeholder="Réservé">
-  <input id="seuil" type="number" placeholder="Seuil">
+<input id="sku" placeholder="SKU">
+<input id="stock" type="number" placeholder="Stock">
+<input id="transit" type="number" placeholder="Transit">
+<input id="reserve" type="number" placeholder="Réservé">
+<input id="seuil" type="number" placeholder="Seuil">
 
-  <button onclick="addArticle()">Ajouter</button>
+<button onclick="addArticle()">Ajouter</button>
+<input type="file" onchange="uploadExcel(event)">
 
-  <table>
-    <thead>
-      <tr>
-        <th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
-        <th>Net</th><th>Statut</th><th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="articlesTable"></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+<th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
+<th>Net</th><th>Statut</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="articlesTable"></tbody>
+</table>
 </div>
 
 <!-- PO -->
 <div id="po" style="display:none">
-  <h1 style="color:#f59e0b;">🧾 Demandes d'achat</h1>
+<h1>🧾 Workflow Achat</h1>
 
-  <table>
-    <thead>
-      <tr><th>SKU</th><th>Quantité</th><th>Date</th><th>Statut</th></tr>
-    </thead>
-    <tbody id="poTable"></tbody>
-  </table>
+<table>
+<thead>
+<tr><th>SKU</th><th>Quantité</th><th>Status</th><th>Action</th></tr>
+</thead>
+<tbody id="poTable"></tbody>
+</table>
 </div>
 
-<!-- PROCESS -->
-<div id="process" style="display:none">
-  <h1 style="color:#ef4444;">📐 Processus UML</h1>
+<!-- UML -->
+<div id="uml" style="display:none">
+<h1>📐 UML</h1>
 
-  <h3>AS-IS</h3>
-  <pre>
-Magasinier → Vérifie stock → Excel manuel → Informe acheteur → Commande
-  </pre>
-
-  <h3>TO-BE</h3>
-  <pre>
-Magasinier → Saisie système → Calcul automatique → Génération PO → Validation acheteur
-  </pre>
-
-  <h3>Diagramme fonctionnel</h3>
-  <pre>
-[Stock] → [Calcul Net] → [Comparaison Seuil]
-                        ↓
-               [Alerte rupture]
-                        ↓
-               [Génération PO]
-                        ↓
-                 [Validation]
-  </pre>
+<canvas id="umlCanvas" width="500" height="300"></canvas>
+<button onclick="exportPDF()">Exporter PDF</button>
 </div>
 
 </div>
 
 <script>
 
-/* DATASET PAR DÉFAUT (simulation Excel) */
 let articles = [
   {sku:"A100", stock:10, transit:5, reserve:8, seuil:12},
   {sku:"B200", stock:3, transit:2, reserve:6, seuil:10},
@@ -164,26 +160,78 @@ let articles = [
 
 let pos = [];
 
-function calcNet(a){ return a.stock + a.transit - a.reserve; }
+/* LOGIN */
+async function login(){
+  await signInWithEmailAndPassword(auth, email.value, password.value);
+  alert("Connecté");
+  document.getElementById("login").style.display="none";
+  show("dashboard");
+}
 
+/* NAV */
+function show(p){
+  document.querySelectorAll(".content > div").forEach(d=>d.style.display="none");
+  document.getElementById(p).style.display="block";
+}
+
+/* CALCUL */
+function calcNet(a){
+  return a.stock + a.transit - a.reserve;
+}
 function getStatus(a){
   return calcNet(a) < a.seuil ? "À commander" : "OK";
 }
 
+/* AJOUT */
+async function addArticle(){
+  let a = {
+    sku:sku.value,
+    stock:+stock.value,
+    transit:+transit.value,
+    reserve:+reserve.value,
+    seuil:+seuil.value
+  };
+
+  articles.push(a);
+
+  await addDoc(collection(db,"articles"), a);
+
+  generatePO(a);
+  render();
+}
+
+/* PO */
 function generatePO(a){
   if(calcNet(a) < a.seuil){
     pos.push({
       sku:a.sku,
       qty:(a.seuil - calcNet(a)) + 5,
-      date:new Date().toLocaleDateString(),
-      statut:"Brouillon"
+      status:"En attente"
     });
   }
 }
 
+function validatePO(i){
+  pos[i].status = "Validé";
+  render();
+}
+
+/* EXCEL */
+function uploadExcel(e){
+  let reader = new FileReader();
+  reader.onload = function(evt){
+    let data = new Uint8Array(evt.target.result);
+    let wb = XLSX.read(data,{type:'array'});
+    let sheet = wb.Sheets[wb.SheetNames[0]];
+    articles = XLSX.utils.sheet_to_json(sheet);
+    render();
+  };
+  reader.readAsArrayBuffer(e.target.files[0]);
+}
+
+/* RENDER */
 function render(){
 
-  /* ARTICLES */
   let html="";
   articles.forEach((a,i)=>{
     let net=calcNet(a);
@@ -197,36 +245,35 @@ function render(){
       <td>${a.reserve}</td>
       <td>${net}</td>
       <td class="${st=='OK'?'ok':'alert'}">${st}</td>
-      <td><button onclick="del(${i})">X</button></td>
+      <td><button onclick="articles.splice(${i},1);render()">X</button></td>
     </tr>`;
   });
-  document.getElementById("articlesTable").innerHTML=html;
+  articlesTable.innerHTML=html;
 
-  /* PO */
   let poHTML="";
-  pos.forEach(p=>{
+  pos.forEach((p,i)=>{
     poHTML+=`
     <tr>
       <td>${p.sku}</td>
       <td>${p.qty}</td>
-      <td>${p.date}</td>
-      <td>${p.statut}</td>
+      <td>${p.status}</td>
+      <td><button onclick="validatePO(${i})">Valider</button></td>
     </tr>`;
   });
-  document.getElementById("poTable").innerHTML=poHTML;
+  poTable.innerHTML=poHTML;
 
   updateKPI();
 }
 
-/* KPI + GRAPH */
+/* KPI */
 function updateKPI(){
   let total=articles.length;
   let ok=articles.filter(a=>getStatus(a)=="OK").length;
   let alert=total-ok;
 
-  document.getElementById("kpi_total").innerHTML="Articles: "+total;
-  document.getElementById("kpi_ok").innerHTML="OK: "+ok;
-  document.getElementById("kpi_alert").innerHTML="Alertes: "+alert;
+  kpi_total.innerHTML="Total: "+total;
+  kpi_ok.innerHTML="OK: "+ok;
+  kpi_alert.innerHTML="Alertes: "+alert;
 
   new Chart(document.getElementById("chart"),{
     type:"pie",
@@ -237,28 +284,20 @@ function updateKPI(){
   });
 }
 
-/* ACTIONS */
-function addArticle(){
-  let a={
-    sku:sku.value,
-    stock:+stock.value,
-    transit:+transit.value,
-    reserve:+reserve.value,
-    seuil:+seuil.value
-  };
-  articles.push(a);
-  generatePO(a);
-  render();
+/* UML */
+function drawUML(){
+  let ctx = document.getElementById("umlCanvas").getContext("2d");
+  ctx.fillText("Stock → Calcul → Alerte → PO → Validation",50,150);
 }
+drawUML();
 
-function del(i){
-  articles.splice(i,1);
-  render();
-}
-
-function showPage(p){
-  document.querySelectorAll(".content > div").forEach(d=>d.style.display="none");
-  document.getElementById(p).style.display="block";
+/* PDF */
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  let pdf = new jsPDF();
+  pdf.text("Diagramme UML WarehouseOps",10,10);
+  pdf.text("Stock → Calcul → PO → Validation",10,30);
+  pdf.save("uml.pdf");
 }
 
 /* INIT */
