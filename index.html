@@ -2,212 +2,239 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>WarehouseOps V2.4</title>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<title>WarehouseOps V2.5</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
+body { font-family: Arial; margin:0; display:flex; }
+.sidebar {
+  width:220px; background:#2c3e50; color:white; height:100vh; padding:20px;
+}
+.sidebar h2 { color:white; }
+.sidebar a {
+  display:block; color:white; margin:10px 0; text-decoration:none;
+}
+.content { flex:1; padding:20px; }
 
-body{font-family:Segoe UI;margin:0;background:#f4f6fa;}
-.sidebar{position:fixed;width:230px;height:100%;background:#2f4050;color:white;padding:20px;}
-.sidebar li{cursor:pointer;margin:10px 0;}
-.main{margin-left:250px;padding:20px;}
-.hidden{display:none;}
+table { border-collapse: collapse; width:100%; margin-top:10px; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; }
 
-table{width:100%;border-collapse:collapse;}
-th,td{padding:8px;border:1px solid #ccc;}
+.ok { color:green; font-weight:bold; }
+.alert { color:red; font-weight:bold; }
 
-button{margin:5px;padding:8px;}
-
+button { margin:5px; }
 </style>
-
 </head>
 
 <body>
 
 <div class="sidebar">
-<h2>WarehouseOps V2.4</h2>
-<ul>
-<li onclick="show('dashboard')">Dashboard</li>
-<li onclick="show('articles')">Articles</li>
-<li onclick="show('po')">Demandes achat</li>
-<li onclick="show('process')">Processus</li>
-</ul>
+  <h2>WarehouseOps V2.5</h2>
+  <a onclick="showPage('dashboard')">Dashboard</a>
+  <a onclick="showPage('articles')">Articles</a>
+  <a onclick="showPage('po')">Demandes achat</a>
+  <a onclick="showPage('process')">Processus</a>
 </div>
 
-<div class="main">
+<div class="content">
 
 <!-- DASHBOARD -->
 <div id="dashboard">
-<h2>Dashboard (V2.3 conservé)</h2>
-<p>Utilise Excel comme avant</p>
+  <h1>Dashboard</h1>
+  <p>Suivi des stocks et des ruptures.</p>
 </div>
 
 <!-- ARTICLES -->
-<div id="articles" class="hidden">
+<div id="articles" style="display:none">
+  <h1>Gestion Articles</h1>
 
-<h2>Gestion Articles</h2>
+  <input id="sku" placeholder="SKU">
+  <input id="stock" type="number" placeholder="Stock">
+  <input id="transit" type="number" placeholder="Transit">
+  <input id="reserve" type="number" placeholder="Réservé">
+  <input id="seuil" type="number" placeholder="Seuil min">
 
-<input id="sku" placeholder="SKU">
-<input id="desc" placeholder="Description">
-<input id="stock" placeholder="Stock">
-<input id="transit" placeholder="Transit">
-<input id="reserve" placeholder="Réservé">
-<input id="seuil" placeholder="Seuil">
+  <button onclick="addArticle()">Ajouter</button>
+  <button onclick="exportArticles()">Export Excel</button>
 
-<button onclick="addArticle()">Ajouter</button>
-
-<table>
-<thead>
-<tr>
-<th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th><th>Net</th><th>Statut</th><th>Action</th>
-</tr>
-</thead>
-<tbody id="articlesTable"></tbody>
-</table>
-
+  <table id="tableArticles">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Stock</th>
+        <th>Transit</th>
+        <th>Réservé</th>
+        <th>Net</th>
+        <th>Statut</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <!-- PO -->
-<div id="po" class="hidden">
+<div id="po" style="display:none">
+  <h1>Demandes d'achat (PO Draft)</h1>
+  <button onclick="exportPO()">Export Excel</button>
 
-<h2>Demandes d'achat (PO Draft)</h2>
-
-<table>
-<thead>
-<tr>
-<th>SKU</th><th>Quantité</th><th>Date</th><th>Statut</th>
-</tr>
-</thead>
-<tbody id="poTable"></tbody>
-</table>
-
+  <table id="tablePO">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Quantité</th>
+        <th>Date</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <!-- PROCESS -->
-<div id="process" class="hidden">
+<div id="process" style="display:none">
+  <h1>Processus UML</h1>
 
-<h2>Processus UML</h2>
+  <h3>AS-IS</h3>
+  <p>
+  Magasinier → vérifie stock → Excel manuel → informe acheteur → commande
+  </p>
 
-<h3>AS-IS</h3>
-<p>
-Magasinier → vérifie stock → Excel manuel → informe acheteur → commande
-</p>
+  <h3>TO-BE</h3>
+  <p>
+  Magasinier → saisie système → calcul automatique → génération PO → Acheteur valide
+  </p>
 
-<h3>TO-BE</h3>
-<p>
-Magasinier → saisie système → calcul automatique → génération PO → Acheteur valide
-</p>
-
+  <h3>Swimlane simplifié</h3>
+  <pre>
+Magasinier     |  Système              | Acheteur
+------------------------------------------------------
+Saisie stock   |                       |
+               | Calcul Net            |
+               | Détection rupture     |
+               | Génération PO Draft   |
+               | --------------------> | Validation
+  </pre>
 </div>
 
 </div>
 
 <script>
 
-let articles=[]
-let po=[]
+let articles = JSON.parse(localStorage.getItem("articles")) || [];
+let pos = JSON.parse(localStorage.getItem("pos")) || [];
 
-function show(id){
-document.querySelectorAll(".main > div").forEach(d=>d.classList.add("hidden"))
-document.getElementById(id).classList.remove("hidden")
+function save() {
+  localStorage.setItem("articles", JSON.stringify(articles));
+  localStorage.setItem("pos", JSON.stringify(pos));
 }
 
-function calcNet(a){
-return a.stock + a.transit - a.reserve
+function showPage(page) {
+  document.querySelectorAll(".content > div").forEach(d => d.style.display="none");
+  document.getElementById(page).style.display="block";
 }
 
-function addArticle(){
-
-let a={
-sku:sku.value,
-stock:+stock.value,
-transit:+transit.value,
-reserve:+reserve.value,
-seuil:+seuil.value
+function addArticle() {
+  let a = {
+    sku: sku.value,
+    stock: +stock.value,
+    transit: +transit.value,
+    reserve: +reserve.value,
+    seuil: +seuil.value
+  };
+  articles.push(a);
+  generatePO(a);
+  save();
+  render();
 }
 
-articles.push(a)
-render()
-
+function calcNet(a) {
+  return a.stock + a.transit - a.reserve;
 }
 
-function render(){
-
-let tbody=document.getElementById("articlesTable")
-tbody.innerHTML=""
-
-articles.forEach((a,i)=>{
-
-let net=calcNet(a)
-
-let status="OK"
-
-if(net<a.seuil){
-
-status="A commander"
-
-generatePO(a,net)
-
+function getStatus(a) {
+  return calcNet(a) < a.seuil ? "À commander" : "OK";
 }
 
-tbody.innerHTML+=`
-
-<tr>
-<td>${a.sku}</td>
-<td>${a.stock}</td>
-<td>${a.transit}</td>
-<td>${a.reserve}</td>
-<td>${net}</td>
-<td>${status}</td>
-<td><button onclick="del(${i})">X</button></td>
-</tr>
-`
-
-})
-
-renderPO()
-
+function generatePO(a) {
+  let net = calcNet(a);
+  if (net < a.seuil) {
+    let qty = (a.seuil - net) + 5; // marge
+    pos.push({
+      sku: a.sku,
+      qty: qty,
+      date: new Date().toLocaleDateString(),
+      statut: "Brouillon"
+    });
+  }
 }
 
-function generatePO(a,net){
-
-let qty=(a.seuil-net)+10
-
-po.push({
-sku:a.sku,
-qty:qty,
-date:new Date().toLocaleDateString(),
-status:"Brouillon"
-})
-
+function deleteArticle(i) {
+  articles.splice(i,1);
+  save();
+  render();
 }
 
-function renderPO(){
+function render() {
 
-let tbody=document.getElementById("poTable")
-tbody.innerHTML=""
+  // ARTICLES
+  let tbody = document.querySelector("#tableArticles tbody");
+  tbody.innerHTML = "";
 
-po.forEach(p=>{
+  articles.forEach((a,i)=>{
+    let net = calcNet(a);
+    let statut = getStatus(a);
 
-tbody.innerHTML+=`
+    let row = `
+      <tr>
+        <td contenteditable onblur="edit(${i},'sku',this.innerText)">${a.sku}</td>
+        <td contenteditable onblur="edit(${i},'stock',this.innerText)">${a.stock}</td>
+        <td contenteditable onblur="edit(${i},'transit',this.innerText)">${a.transit}</td>
+        <td contenteditable onblur="edit(${i},'reserve',this.innerText)">${a.reserve}</td>
+        <td>${net}</td>
+        <td class="${statut==='OK'?'ok':'alert'}">${statut}</td>
+        <td><button onclick="deleteArticle(${i})">X</button></td>
+      </tr>`;
+    tbody.innerHTML += row;
+  });
 
-<tr>
-<td>${p.sku}</td>
-<td>${p.qty}</td>
-<td>${p.date}</td>
-<td>${p.status}</td>
-</tr>
-`
+  // PO
+  let tbodyPO = document.querySelector("#tablePO tbody");
+  tbodyPO.innerHTML = "";
 
-})
-
+  pos.forEach(p=>{
+    let row = `
+      <tr>
+        <td>${p.sku}</td>
+        <td>${p.qty}</td>
+        <td>${p.date}</td>
+        <td>${p.statut}</td>
+      </tr>`;
+    tbodyPO.innerHTML += row;
+  });
 }
 
-function del(i){
-articles.splice(i,1)
-render()
+function edit(i, field, value) {
+  articles[i][field] = isNaN(value) ? value : +value;
+  save();
+  render();
 }
+
+function exportArticles() {
+  let ws = XLSX.utils.json_to_sheet(articles);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Articles");
+  XLSX.writeFile(wb, "articles.xlsx");
+}
+
+function exportPO() {
+  let ws = XLSX.utils.json_to_sheet(pos);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "PO");
+  XLSX.writeFile(wb, "po.xlsx");
+}
+
+render();
 
 </script>
 
