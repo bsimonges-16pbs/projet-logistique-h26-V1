@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>WarehouseOps - Tableau de bord</title>
+<title>WarehouseOps Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -37,6 +37,7 @@ padding:0;
 
 .sidebar li{
 margin:15px 0;
+cursor:pointer;
 }
 
 /* MAIN */
@@ -45,8 +46,6 @@ margin:15px 0;
 margin-left:250px;
 padding:20px;
 }
-
-/* HEADER */
 
 header{
 background:#1f2d3d;
@@ -69,6 +68,7 @@ padding:20px;
 border-radius:10px;
 color:white;
 text-align:center;
+font-weight:bold;
 }
 
 .k1{background:#3498db;}
@@ -78,8 +78,6 @@ text-align:center;
 .k5{background:#9b59b6;}
 .k6{background:#16a085;}
 .k7{background:#34495e;}
-
-/* GRID */
 
 .analytics{
 display:grid;
@@ -112,21 +110,29 @@ padding:10px;
 border-bottom:1px solid #ddd;
 }
 
-/* INVENTORY */
-
-.inventory{
-margin-top:40px;
-}
+/* STATUS */
 
 .status-ok{color:green;font-weight:bold;}
 .status-risk{color:red;font-weight:bold;}
 .status-sur{color:#e67e22;font-weight:bold;}
 
-.workflow{
-background:white;
-margin-top:30px;
-padding:20px;
-border-radius:10px;
+.controls{
+margin-top:20px;
+}
+
+button{
+padding:8px 15px;
+margin-right:10px;
+border:none;
+border-radius:5px;
+background:#3498db;
+color:white;
+cursor:pointer;
+}
+
+input{
+padding:8px;
+margin-right:10px;
 }
 
 </style>
@@ -140,10 +146,10 @@ border-radius:10px;
 <h2>WarehouseOps</h2>
 
 <ul>
-<li>Tableau de bord</li>
-<li>Analyse</li>
-<li>Commandes</li>
-<li>Inventaire</li>
+<li onclick="showSection('dashboard')">Tableau de bord</li>
+<li onclick="showSection('analyse')">Analyse</li>
+<li onclick="showSection('commandes')">Commandes</li>
+<li onclick="showSection('inventaire')">Inventaire</li>
 </ul>
 
 </div>
@@ -154,7 +160,7 @@ border-radius:10px;
 
 <h1>Tableau de bord WarehouseOps</h1>
 
-<div>Version actuelle : <b>V2.2</b></div>
+<div>Version actuelle : <b>V2.3</b></div>
 
 Utilisateur :
 
@@ -169,48 +175,56 @@ Utilisateur :
 
 <input type="file" id="excelFile">
 
+<div class="controls">
+
+<input type="text" id="searchSKU" placeholder="Recherche SKU">
+
+<button onclick="exportCSV()">Export CSV</button>
+
+<button onclick="exportExcel()">Export Excel</button>
+
+</div>
+
 <!-- KPI -->
 
 <div class="kpi-grid">
 
 <div class="kpi k1">
-<h2 id="totalSKU">0</h2>
+<div id="totalSKU">0</div>
 Total SKU
 </div>
 
 <div class="kpi k2">
-<h2 id="rupture">0</h2>
+<div id="rupture">0</div>
 Ruptures
 </div>
 
 <div class="kpi k3">
-<h2 id="surstock">0</h2>
-Surstockage
+<div id="surstock">0</div>
+Surstock
 </div>
 
 <div class="kpi k4">
-<h2 id="actions">0</h2>
-Actions d'achat
+<div id="under">0</div>
+Sous seuil
 </div>
 
 <div class="kpi k5">
-<h2 id="service">0%</h2>
-Taux de service
+<div id="service">0%</div>
+Taux service
 </div>
 
 <div class="kpi k6">
-<h2 id="security">0</h2>
+<div id="security">0</div>
 Stock sécurité
 </div>
 
 <div class="kpi k7">
-<h2 id="ruptureRate">0%</h2>
-Taux de rupture
+<div id="ruptureRate">0%</div>
+Taux rupture
 </div>
 
 </div>
-
-<!-- ANALYTICS -->
 
 <div class="analytics">
 
@@ -221,12 +235,14 @@ Taux de rupture
 <table>
 
 <thead>
+
 <tr>
 <th>SKU</th>
 <th>Description</th>
-<th>Stock</th>
+<th>Net disponible</th>
 <th>Seuil</th>
 </tr>
+
 </thead>
 
 <tbody id="tableCommandes"></tbody>
@@ -242,12 +258,13 @@ Taux de rupture
 <table>
 
 <thead>
+
 <tr>
 <th>SKU</th>
 <th>Description</th>
 <th>Stock</th>
-<th>Seuil</th>
 </tr>
+
 </thead>
 
 <tbody id="tableRuptures"></tbody>
@@ -258,33 +275,21 @@ Taux de rupture
 
 <div class="card">
 
-<h3>Analyse inventaire</h3>
+<h3>Distribution ABC</h3>
 
-<canvas id="inventoryChart"></canvas>
+<canvas id="abcChart"></canvas>
 
 </div>
 
 <div class="card">
 
-<h3>Volume logistique</h3>
+<h3>État du stock</h3>
 
-<canvas id="volumeChart"></canvas>
-
-</div>
+<canvas id="inventoryChart"></canvas>
 
 </div>
 
-<div class="workflow">
-
-<h3>Workflow réapprovisionnement</h3>
-
-Stock faible → Analyse acheteur → Commande fournisseur → Réception entrepôt → Mise à jour inventaire
-
 </div>
-
-<!-- INVENTAIRE -->
-
-<div class="inventory">
 
 <h2>Inventaire détaillé</h2>
 
@@ -296,7 +301,9 @@ Stock faible → Analyse acheteur → Commande fournisseur → Réception entrep
 
 <th>SKU</th>
 <th>Description</th>
-<th>Stock physique</th>
+<th>Stock</th>
+<th>Inbound</th>
+<th>Réservé</th>
 <th>Net disponible</th>
 <th>Seuil</th>
 <th>Classe ABC</th>
@@ -312,13 +319,11 @@ Stock faible → Analyse acheteur → Commande fournisseur → Réception entrep
 
 </div>
 
-</div>
-
 <script>
 
 let dataset=[]
+let abcChart
 let inventoryChart
-let volumeChart
 
 document.getElementById("excelFile").addEventListener("change",loadFile)
 
@@ -329,7 +334,9 @@ const reader=new FileReader()
 reader.onload=function(evt){
 
 const data=new Uint8Array(evt.target.result)
+
 const workbook=XLSX.read(data,{type:'array'})
+
 const sheet=workbook.Sheets[workbook.SheetNames[0]]
 
 dataset=XLSX.utils.sheet_to_json(sheet)
@@ -354,8 +361,10 @@ function processData(data){
 
 let rupture=0
 let surstock=0
-let actions=0
+let under=0
 let security=0
+
+let abc={A:0,B:0,C:0}
 
 const tbody=document.querySelector("#inventoryTable tbody")
 const commandes=document.getElementById("tableCommandes")
@@ -368,46 +377,53 @@ ruptures.innerHTML=""
 data.forEach(item=>{
 
 let stock=item.stock_physical||0
+let inbound=item.inbound||Math.floor(Math.random()*50)
+let reserved=item.reserved||Math.floor(Math.random()*20)
+
 let reorder=item.reorder_point||0
-let net=stock
+
+let net=stock+inbound-reserved
 
 let status="OK"
 let className="status-ok"
 
-let abc=classifyABC(stock)
+let abcClass=classifyABC(stock)
+abc[abcClass]++
 
 if(net<reorder){
 
-status="Réapprovisionnement requis"
+under++
+status="Réapprovisionnement"
 className="status-risk"
-
-rupture++
-actions++
 
 commandes.innerHTML+=`
 <tr>
 <td>${item.sku}</td>
 <td>${item.description}</td>
-<td>${stock}</td>
+<td>${net}</td>
 <td>${reorder}</td>
 </tr>`
+
+}
+
+if(stock==0){
+
+rupture++
 
 ruptures.innerHTML+=`
 <tr>
 <td>${item.sku}</td>
 <td>${item.description}</td>
 <td>${stock}</td>
-<td>${reorder}</td>
 </tr>`
 
 }
 
-else if(stock>reorder*2){
-
-status="Surstockage"
-className="status-sur"
+if(stock>reorder*2){
 
 surstock++
+status="Surstock"
+className="status-sur"
 
 }
 
@@ -420,9 +436,11 @@ tbody.innerHTML+=`
 <td>${item.sku}</td>
 <td>${item.description}</td>
 <td>${stock}</td>
+<td>${inbound}</td>
+<td>${reserved}</td>
 <td>${net}</td>
 <td>${reorder}</td>
-<td>${abc}</td>
+<td>${abcClass}</td>
 <td class="${className}">${status}</td>
 
 </tr>
@@ -433,22 +451,32 @@ tbody.innerHTML+=`
 
 let total=data.length
 
-let service=((total-rupture)/total*100).toFixed(1)
-let ruptureRate=((rupture)/total*100).toFixed(1)
-
 document.getElementById("totalSKU").innerText=total
 document.getElementById("rupture").innerText=rupture
 document.getElementById("surstock").innerText=surstock
-document.getElementById("actions").innerText=actions
-document.getElementById("service").innerText=service+"%"
+document.getElementById("under").innerText=under
+document.getElementById("service").innerText=((total-rupture)/total*100).toFixed(1)+"%"
 document.getElementById("security").innerText=security
-document.getElementById("ruptureRate").innerText=ruptureRate+"%"
+document.getElementById("ruptureRate").innerText=(rupture/total*100).toFixed(1)+"%"
 
-drawCharts(rupture,surstock,total)
+drawCharts(abc,rupture,surstock,total)
 
 }
 
-function drawCharts(rupture,surstock,total){
+function drawCharts(abc,rupture,surstock,total){
+
+if(abcChart)abcChart.destroy()
+
+abcChart=new Chart(document.getElementById("abcChart"),{
+
+type:"pie",
+
+data:{
+labels:["Classe A","Classe B","Classe C"],
+datasets:[{data:[abc.A,abc.B,abc.C]}]
+}
+
+})
 
 let ok=total-rupture-surstock
 
@@ -456,7 +484,7 @@ if(inventoryChart)inventoryChart.destroy()
 
 inventoryChart=new Chart(document.getElementById("inventoryChart"),{
 
-type:"pie",
+type:"bar",
 
 data:{
 labels:["OK","Rupture","Surstock"],
@@ -465,18 +493,41 @@ datasets:[{data:[ok,rupture,surstock]}]
 
 })
 
-if(volumeChart)volumeChart.destroy()
-
-volumeChart=new Chart(document.getElementById("volumeChart"),{
-
-type:"bar",
-
-data:{
-labels:["Rupture","Surstock","OK"],
-datasets:[{data:[rupture,surstock,ok]}]
 }
 
+function exportCSV(){
+
+let rows=document.querySelectorAll("#inventoryTable tr")
+
+let csv=[]
+
+rows.forEach(row=>{
+
+let cols=row.querySelectorAll("td,th")
+let data=[]
+
+cols.forEach(col=>data.push(col.innerText))
+
+csv.push(data.join(","))
+
 })
+
+let csvFile=new Blob([csv.join("\n")])
+
+let link=document.createElement("a")
+
+link.download="inventaire.csv"
+link.href=window.URL.createObjectURL(csvFile)
+
+link.click()
+
+}
+
+function exportExcel(){
+
+let wb=XLSX.utils.table_to_book(document.getElementById("inventoryTable"))
+
+XLSX.writeFile(wb,"inventaire.xlsx")
 
 }
 
