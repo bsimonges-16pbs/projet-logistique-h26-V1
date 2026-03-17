@@ -2,6 +2,7 @@
 <html lang="fr">
 
 <head>
+
 <meta charset="UTF-8">
 <title>WarehouseOps</title>
 
@@ -22,7 +23,7 @@ padding:20px;
 text-align:center;
 }
 
-.version-bar{
+.role{
 margin-top:10px;
 }
 
@@ -49,19 +50,10 @@ text-align:center;
 .kpi-surstock{background:#f39c12;}
 .kpi-commandes{background:#27ae60;}
 
-.kpi h2{
-margin:0;
-font-size:32px;
-}
-
 .controls{
 display:flex;
-gap:15px;
+gap:10px;
 margin-bottom:20px;
-}
-
-input,select{
-padding:8px;
 }
 
 table{
@@ -78,14 +70,21 @@ border-bottom:1px solid #ddd;
 th{
 background:#34495e;
 color:white;
-cursor:pointer;
 }
 
 .status-ok{color:green;font-weight:bold;}
 .status-risk{color:red;font-weight:bold;}
-.status-surstock{color:#e67e22;font-weight:bold;}
+.status-action{color:#e67e22;font-weight:bold;}
+
+.workflow{
+background:white;
+padding:15px;
+margin-top:30px;
+border-radius:8px;
+}
 
 </style>
+
 </head>
 
 <body>
@@ -94,14 +93,18 @@ cursor:pointer;
 
 <h1>WarehouseOps Dashboard</h1>
 
-<div class="version-bar">
+<div>
+Version actuelle : <b>V1.2</b>
+</div>
 
-Version actuelle :
+<div class="role">
 
-<select id="versionSelect">
+Utilisateur :
 
-<option>V1.1</option>
-<option>V1.0</option>
+<select id="userRole">
+
+<option value="magasinier">Magasinier</option>
+<option value="acheteur">Acheteur</option>
 
 </select>
 
@@ -115,11 +118,7 @@ Version actuelle :
 
 <input type="file" id="excelFile">
 
-<input type="text" id="searchBox" placeholder="Rechercher SKU ou produit">
-
-<select id="categoryFilter">
-<option value="all">Toutes catégories</option>
-</select>
+<input type="text" id="searchBox" placeholder="Recherche SKU">
 
 </div>
 
@@ -142,7 +141,7 @@ Version actuelle :
 
 <div class="kpi kpi-commandes">
 <h2 id="commandes">0</h2>
-<p>À commander</p>
+<p>Actions achat</p>
 </div>
 
 </div>
@@ -153,14 +152,12 @@ Version actuelle :
 
 <tr>
 
-<th onclick="sortTable(0)">SKU</th>
+<th>SKU</th>
 <th>Description</th>
-<th>Catégorie</th>
-<th onclick="sortTable(3)">Stock</th>
-<th onclick="sortTable(4)">Reorder</th>
-<th>EOQ</th>
-<th>Status</th>
-<th>Quantité suggérée</th>
+<th>Stock physique</th>
+<th>Net disponible</th>
+<th>Reorder Point</th>
+<th>Message action</th>
 
 </tr>
 
@@ -170,15 +167,27 @@ Version actuelle :
 
 </table>
 
+<div class="workflow">
+
+<h3>Workflow de réapprovisionnement</h3>
+
+<p>
+
+Stock faible → Message système → Analyse acheteur →  
+Commande fournisseur → Réception entrepôt → Mise à jour inventaire
+
+</p>
+
+</div>
+
 </div>
 
 <script>
 
-let globalData=[]
+let dataGlobal=[]
 
 document.getElementById("excelFile").addEventListener("change",loadFile)
-document.getElementById("searchBox").addEventListener("input",filterTable)
-document.getElementById("categoryFilter").addEventListener("change",filterTable)
+document.getElementById("searchBox").addEventListener("input",filterData)
 
 function loadFile(e){
 
@@ -191,34 +200,13 @@ const data=new Uint8Array(evt.target.result)
 const workbook=XLSX.read(data,{type:'array'})
 const sheet=workbook.Sheets[workbook.SheetNames[0]]
 
-globalData=XLSX.utils.sheet_to_json(sheet)
+dataGlobal=XLSX.utils.sheet_to_json(sheet)
 
-populateCategories()
-
-processData(globalData)
+processData(dataGlobal)
 
 }
 
 reader.readAsArrayBuffer(file)
-
-}
-
-function populateCategories(){
-
-let categories=[...new Set(globalData.map(i=>i.category))]
-
-let select=document.getElementById("categoryFilter")
-
-categories.forEach(c=>{
-
-let option=document.createElement("option")
-
-option.value=c
-option.text=c
-
-select.appendChild(option)
-
-})
 
 }
 
@@ -229,31 +217,36 @@ let surstock=0
 let commandes=0
 
 const tbody=document.querySelector("#inventoryTable tbody")
+
 tbody.innerHTML=""
 
 data.forEach(item=>{
 
 let stock=item.stock_physical||0
 let reorder=item.reorder_point||0
-let eoq=item.EOQ||0
-let suggested=item.qty_suggested||0
 
-let status="OK"
+let net=stock
+
+let message="OK"
 let className="status-ok"
 
-if(stock<reorder){
+if(net<reorder){
 
-status="RUPTURE / COMMANDER"
+message="Réapprovisionnement requis"
+
 className="status-risk"
+
 rupture++
 commandes++
 
 }
 
-else if(stock>eoq*2){
+else if(stock>reorder*2){
 
-status="SURSTOCK"
-className="status-surstock"
+message="Surstock"
+
+className="status-action"
+
 surstock++
 
 }
@@ -264,12 +257,10 @@ row.innerHTML=`
 
 <td>${item.sku}</td>
 <td>${item.description}</td>
-<td>${item.category}</td>
 <td>${stock}</td>
+<td>${net}</td>
 <td>${reorder}</td>
-<td>${eoq}</td>
-<td class="${className}">${status}</td>
-<td>${suggested}</td>
+<td class="${className}">${message}</td>
 
 `
 
@@ -284,37 +275,17 @@ document.getElementById("commandes").innerText=commandes
 
 }
 
-function filterTable(){
+function filterData(){
 
 let search=document.getElementById("searchBox").value.toLowerCase()
-let category=document.getElementById("categoryFilter").value
 
-let filtered=globalData.filter(item=>{
+let filtered=dataGlobal.filter(i=>
 
-let matchSearch=(item.sku+" "+item.description+" "+item.category).toLowerCase().includes(search)
+(i.sku+" "+i.description).toLowerCase().includes(search)
 
-let matchCategory=(category==="all"||item.category===category)
-
-return matchSearch&&matchCategory
-
-})
+)
 
 processData(filtered)
-
-}
-
-function sortTable(col){
-
-let table=document.getElementById("inventoryTable")
-let rows=Array.from(table.rows).slice(1)
-
-rows.sort((a,b)=>{
-
-return a.cells[col].innerText.localeCompare(b.cells[col].innerText)
-
-})
-
-rows.forEach(r=>table.appendChild(r))
 
 }
 
