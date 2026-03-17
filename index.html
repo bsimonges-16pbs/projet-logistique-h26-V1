@@ -2,118 +2,152 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>WarehouseOps V2.5</title>
+<title>WarehouseOps V2.6</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-body { font-family: Arial; margin:0; display:flex; }
+body { margin:0; font-family:Arial; display:flex; }
+
+/* SIDEBAR */
 .sidebar {
-  width:220px; background:#2c3e50; color:white; height:100vh; padding:20px;
+  width:240px;
+  background:#1e293b;
+  color:white;
+  height:100vh;
+  padding:15px;
 }
-.sidebar h2 { color:white; }
-.sidebar a {
-  display:block; color:white; margin:10px 0; text-decoration:none;
+
+.menu-block {
+  background:#334155;
+  margin:10px 0;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:0.3s;
 }
+
+.menu-block:hover { background:#475569; }
+
+.dashboard { border-left:5px solid #3b82f6; }
+.articles { border-left:5px solid #22c55e; }
+.po { border-left:5px solid #f59e0b; }
+.process { border-left:5px solid #ef4444; }
+
 .content { flex:1; padding:20px; }
 
-table { border-collapse: collapse; width:100%; margin-top:10px; }
+/* TABLE */
+table { border-collapse: collapse; width:100%; }
 th, td { border:1px solid #ccc; padding:8px; text-align:center; }
 
 .ok { color:green; font-weight:bold; }
 .alert { color:red; font-weight:bold; }
 
-button { margin:5px; }
+/* KPI */
+.kpi {
+  display:flex;
+  gap:20px;
+  margin-bottom:20px;
+}
+.card {
+  padding:15px;
+  border-radius:10px;
+  color:white;
+  flex:1;
+}
+.blue { background:#3b82f6; }
+.green { background:#22c55e; }
+.orange { background:#f59e0b; }
+.red { background:#ef4444; }
+
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-  <h2>WarehouseOps V2.5</h2>
-  <a onclick="showPage('dashboard')">Dashboard</a>
-  <a onclick="showPage('articles')">Articles</a>
-  <a onclick="showPage('po')">Demandes achat</a>
-  <a onclick="showPage('process')">Processus</a>
+  <h2>WarehouseOps V2.6</h2>
+
+  <div class="menu-block dashboard" onclick="showPage('dashboard')">📊 Tableau de bord</div>
+  <div class="menu-block articles" onclick="showPage('articles')">📦 Articles</div>
+  <div class="menu-block po" onclick="showPage('po')">🧾 Demandes achat</div>
+  <div class="menu-block process" onclick="showPage('process')">📐 Processus</div>
 </div>
 
 <div class="content">
 
 <!-- DASHBOARD -->
 <div id="dashboard">
-  <h1>Dashboard</h1>
-  <p>Suivi des stocks et des ruptures.</p>
+  <h1>📊 Tableau de bord</h1>
+
+  <div class="kpi">
+    <div class="card blue" id="kpi_total"></div>
+    <div class="card green" id="kpi_ok"></div>
+    <div class="card red" id="kpi_alert"></div>
+  </div>
+
+  <canvas id="chart"></canvas>
 </div>
 
 <!-- ARTICLES -->
 <div id="articles" style="display:none">
-  <h1>Gestion Articles</h1>
+  <h1 style="color:#22c55e;">📦 Gestion Articles</h1>
 
   <input id="sku" placeholder="SKU">
   <input id="stock" type="number" placeholder="Stock">
   <input id="transit" type="number" placeholder="Transit">
   <input id="reserve" type="number" placeholder="Réservé">
-  <input id="seuil" type="number" placeholder="Seuil min">
+  <input id="seuil" type="number" placeholder="Seuil">
 
   <button onclick="addArticle()">Ajouter</button>
-  <button onclick="exportArticles()">Export Excel</button>
 
-  <table id="tableArticles">
+  <table>
     <thead>
       <tr>
-        <th>SKU</th>
-        <th>Stock</th>
-        <th>Transit</th>
-        <th>Réservé</th>
-        <th>Net</th>
-        <th>Statut</th>
-        <th>Action</th>
+        <th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
+        <th>Net</th><th>Statut</th><th>Action</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="articlesTable"></tbody>
   </table>
 </div>
 
 <!-- PO -->
 <div id="po" style="display:none">
-  <h1>Demandes d'achat (PO Draft)</h1>
-  <button onclick="exportPO()">Export Excel</button>
+  <h1 style="color:#f59e0b;">🧾 Demandes d'achat</h1>
 
-  <table id="tablePO">
+  <table>
     <thead>
-      <tr>
-        <th>SKU</th>
-        <th>Quantité</th>
-        <th>Date</th>
-        <th>Statut</th>
-      </tr>
+      <tr><th>SKU</th><th>Quantité</th><th>Date</th><th>Statut</th></tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="poTable"></tbody>
   </table>
 </div>
 
 <!-- PROCESS -->
 <div id="process" style="display:none">
-  <h1>Processus UML</h1>
+  <h1 style="color:#ef4444;">📐 Processus UML</h1>
 
   <h3>AS-IS</h3>
-  <p>
-  Magasinier → vérifie stock → Excel manuel → informe acheteur → commande
-  </p>
+  <pre>
+Magasinier → Vérifie stock → Excel manuel → Informe acheteur → Commande
+  </pre>
 
   <h3>TO-BE</h3>
-  <p>
-  Magasinier → saisie système → calcul automatique → génération PO → Acheteur valide
-  </p>
-
-  <h3>Swimlane simplifié</h3>
   <pre>
-Magasinier     |  Système              | Acheteur
-------------------------------------------------------
-Saisie stock   |                       |
-               | Calcul Net            |
-               | Détection rupture     |
-               | Génération PO Draft   |
-               | --------------------> | Validation
+Magasinier → Saisie système → Calcul automatique → Génération PO → Validation acheteur
+  </pre>
+
+  <h3>Diagramme fonctionnel</h3>
+  <pre>
+[Stock] → [Calcul Net] → [Comparaison Seuil]
+                        ↓
+               [Alerte rupture]
+                        ↓
+               [Génération PO]
+                        ↓
+                 [Validation]
   </pre>
 </div>
 
@@ -121,119 +155,114 @@ Saisie stock   |                       |
 
 <script>
 
-let articles = JSON.parse(localStorage.getItem("articles")) || [];
-let pos = JSON.parse(localStorage.getItem("pos")) || [];
+/* DATASET PAR DÉFAUT (simulation Excel) */
+let articles = [
+  {sku:"A100", stock:10, transit:5, reserve:8, seuil:12},
+  {sku:"B200", stock:3, transit:2, reserve:6, seuil:10},
+  {sku:"C300", stock:20, transit:0, reserve:5, seuil:10}
+];
 
-function save() {
-  localStorage.setItem("articles", JSON.stringify(articles));
-  localStorage.setItem("pos", JSON.stringify(pos));
-}
+let pos = [];
 
-function showPage(page) {
-  document.querySelectorAll(".content > div").forEach(d => d.style.display="none");
-  document.getElementById(page).style.display="block";
-}
+function calcNet(a){ return a.stock + a.transit - a.reserve; }
 
-function addArticle() {
-  let a = {
-    sku: sku.value,
-    stock: +stock.value,
-    transit: +transit.value,
-    reserve: +reserve.value,
-    seuil: +seuil.value
-  };
-  articles.push(a);
-  generatePO(a);
-  save();
-  render();
-}
-
-function calcNet(a) {
-  return a.stock + a.transit - a.reserve;
-}
-
-function getStatus(a) {
+function getStatus(a){
   return calcNet(a) < a.seuil ? "À commander" : "OK";
 }
 
-function generatePO(a) {
-  let net = calcNet(a);
-  if (net < a.seuil) {
-    let qty = (a.seuil - net) + 5; // marge
+function generatePO(a){
+  if(calcNet(a) < a.seuil){
     pos.push({
-      sku: a.sku,
-      qty: qty,
-      date: new Date().toLocaleDateString(),
-      statut: "Brouillon"
+      sku:a.sku,
+      qty:(a.seuil - calcNet(a)) + 5,
+      date:new Date().toLocaleDateString(),
+      statut:"Brouillon"
     });
   }
 }
 
-function deleteArticle(i) {
-  articles.splice(i,1);
-  save();
-  render();
-}
+function render(){
 
-function render() {
-
-  // ARTICLES
-  let tbody = document.querySelector("#tableArticles tbody");
-  tbody.innerHTML = "";
-
+  /* ARTICLES */
+  let html="";
   articles.forEach((a,i)=>{
-    let net = calcNet(a);
-    let statut = getStatus(a);
+    let net=calcNet(a);
+    let st=getStatus(a);
 
-    let row = `
-      <tr>
-        <td contenteditable onblur="edit(${i},'sku',this.innerText)">${a.sku}</td>
-        <td contenteditable onblur="edit(${i},'stock',this.innerText)">${a.stock}</td>
-        <td contenteditable onblur="edit(${i},'transit',this.innerText)">${a.transit}</td>
-        <td contenteditable onblur="edit(${i},'reserve',this.innerText)">${a.reserve}</td>
-        <td>${net}</td>
-        <td class="${statut==='OK'?'ok':'alert'}">${statut}</td>
-        <td><button onclick="deleteArticle(${i})">X</button></td>
-      </tr>`;
-    tbody.innerHTML += row;
+    html+=`
+    <tr>
+      <td>${a.sku}</td>
+      <td>${a.stock}</td>
+      <td>${a.transit}</td>
+      <td>${a.reserve}</td>
+      <td>${net}</td>
+      <td class="${st=='OK'?'ok':'alert'}">${st}</td>
+      <td><button onclick="del(${i})">X</button></td>
+    </tr>`;
   });
+  document.getElementById("articlesTable").innerHTML=html;
 
-  // PO
-  let tbodyPO = document.querySelector("#tablePO tbody");
-  tbodyPO.innerHTML = "";
-
+  /* PO */
+  let poHTML="";
   pos.forEach(p=>{
-    let row = `
-      <tr>
-        <td>${p.sku}</td>
-        <td>${p.qty}</td>
-        <td>${p.date}</td>
-        <td>${p.statut}</td>
-      </tr>`;
-    tbodyPO.innerHTML += row;
+    poHTML+=`
+    <tr>
+      <td>${p.sku}</td>
+      <td>${p.qty}</td>
+      <td>${p.date}</td>
+      <td>${p.statut}</td>
+    </tr>`;
+  });
+  document.getElementById("poTable").innerHTML=poHTML;
+
+  updateKPI();
+}
+
+/* KPI + GRAPH */
+function updateKPI(){
+  let total=articles.length;
+  let ok=articles.filter(a=>getStatus(a)=="OK").length;
+  let alert=total-ok;
+
+  document.getElementById("kpi_total").innerHTML="Articles: "+total;
+  document.getElementById("kpi_ok").innerHTML="OK: "+ok;
+  document.getElementById("kpi_alert").innerHTML="Alertes: "+alert;
+
+  new Chart(document.getElementById("chart"),{
+    type:"pie",
+    data:{
+      labels:["OK","A commander"],
+      datasets:[{ data:[ok,alert] }]
+    }
   });
 }
 
-function edit(i, field, value) {
-  articles[i][field] = isNaN(value) ? value : +value;
-  save();
+/* ACTIONS */
+function addArticle(){
+  let a={
+    sku:sku.value,
+    stock:+stock.value,
+    transit:+transit.value,
+    reserve:+reserve.value,
+    seuil:+seuil.value
+  };
+  articles.push(a);
+  generatePO(a);
   render();
 }
 
-function exportArticles() {
-  let ws = XLSX.utils.json_to_sheet(articles);
-  let wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Articles");
-  XLSX.writeFile(wb, "articles.xlsx");
+function del(i){
+  articles.splice(i,1);
+  render();
 }
 
-function exportPO() {
-  let ws = XLSX.utils.json_to_sheet(pos);
-  let wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "PO");
-  XLSX.writeFile(wb, "po.xlsx");
+function showPage(p){
+  document.querySelectorAll(".content > div").forEach(d=>d.style.display="none");
+  document.getElementById(p).style.display="block";
 }
 
+/* INIT */
+articles.forEach(a=>generatePO(a));
 render();
 
 </script>
