@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>WarehouseOps Dashboard</title>
+<title>WarehouseOps - Tableau de bord</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,10 +28,6 @@ height:100%;
 background:#2f4050;
 color:white;
 padding:20px;
-}
-
-.sidebar h2{
-margin-top:0;
 }
 
 .sidebar ul{
@@ -63,7 +59,7 @@ border-radius:8px;
 
 .kpi-grid{
 display:grid;
-grid-template-columns:repeat(6,1fr);
+grid-template-columns:repeat(7,1fr);
 gap:15px;
 margin-top:20px;
 }
@@ -75,14 +71,15 @@ color:white;
 text-align:center;
 }
 
-.kpi1{background:#3498db;}
-.kpi2{background:#e74c3c;}
-.kpi3{background:#f39c12;}
-.kpi4{background:#27ae60;}
-.kpi5{background:#9b59b6;}
-.kpi6{background:#16a085;}
+.k1{background:#3498db;}
+.k2{background:#e74c3c;}
+.k3{background:#f39c12;}
+.k4{background:#27ae60;}
+.k5{background:#9b59b6;}
+.k6{background:#16a085;}
+.k7{background:#34495e;}
 
-/* ANALYTICS GRID */
+/* GRID */
 
 .analytics{
 display:grid;
@@ -97,7 +94,7 @@ padding:20px;
 border-radius:10px;
 }
 
-/* KPI TABLE */
+/* TABLE */
 
 table{
 width:100%;
@@ -125,6 +122,13 @@ margin-top:40px;
 .status-risk{color:red;font-weight:bold;}
 .status-sur{color:#e67e22;font-weight:bold;}
 
+.workflow{
+background:white;
+margin-top:30px;
+padding:20px;
+border-radius:10px;
+}
+
 </style>
 
 </head>
@@ -136,10 +140,10 @@ margin-top:40px;
 <h2>WarehouseOps</h2>
 
 <ul>
-<li>Dashboard</li>
-<li>Analytics</li>
-<li>Orders</li>
-<li>Inventory</li>
+<li>Tableau de bord</li>
+<li>Analyse</li>
+<li>Commandes</li>
+<li>Inventaire</li>
 </ul>
 
 </div>
@@ -148,9 +152,9 @@ margin-top:40px;
 
 <header>
 
-<h1>WarehouseOps Dashboard</h1>
+<h1>Tableau de bord WarehouseOps</h1>
 
-<div>Version actuelle : <b>V2.1</b></div>
+<div>Version actuelle : <b>V2.2</b></div>
 
 Utilisateur :
 
@@ -161,38 +165,47 @@ Utilisateur :
 
 </header>
 
+<br>
+
 <input type="file" id="excelFile">
+
+<!-- KPI -->
 
 <div class="kpi-grid">
 
-<div class="kpi kpi1">
+<div class="kpi k1">
 <h2 id="totalSKU">0</h2>
 Total SKU
 </div>
 
-<div class="kpi kpi2">
+<div class="kpi k2">
 <h2 id="rupture">0</h2>
 Ruptures
 </div>
 
-<div class="kpi kpi3">
+<div class="kpi k3">
 <h2 id="surstock">0</h2>
 Surstockage
 </div>
 
-<div class="kpi kpi4">
+<div class="kpi k4">
 <h2 id="actions">0</h2>
-Actions Achat
+Actions d'achat
 </div>
 
-<div class="kpi kpi5">
+<div class="kpi k5">
 <h2 id="service">0%</h2>
-Service Level
+Taux de service
 </div>
 
-<div class="kpi kpi6">
+<div class="kpi k6">
 <h2 id="security">0</h2>
-Stock Sécurité
+Stock sécurité
+</div>
+
+<div class="kpi k7">
+<h2 id="ruptureRate">0%</h2>
+Taux de rupture
 </div>
 
 </div>
@@ -203,24 +216,20 @@ Stock Sécurité
 
 <div class="card">
 
-<h3>Orders / Actions Achat</h3>
+<h3>Produits à commander</h3>
 
 <table>
 
+<thead>
 <tr>
-<th>Indicateur</th>
-<th>Valeur</th>
+<th>SKU</th>
+<th>Description</th>
+<th>Stock</th>
+<th>Seuil</th>
 </tr>
+</thead>
 
-<tr>
-<td>Commandes à passer</td>
-<td id="actions2">0</td>
-</tr>
-
-<tr>
-<td>Ruptures critiques</td>
-<td id="rupture2">0</td>
-</tr>
+<tbody id="tableCommandes"></tbody>
 
 </table>
 
@@ -228,39 +237,30 @@ Stock Sécurité
 
 <div class="card">
 
-<h3>Inventory Analytics</h3>
+<h3>Ruptures critiques</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>SKU</th>
+<th>Description</th>
+<th>Stock</th>
+<th>Seuil</th>
+</tr>
+</thead>
+
+<tbody id="tableRuptures"></tbody>
+
+</table>
+
+</div>
+
+<div class="card">
+
+<h3>Analyse inventaire</h3>
 
 <canvas id="inventoryChart"></canvas>
-
-</div>
-
-<div class="card">
-
-<h3>KPI Performance</h3>
-
-<table>
-
-<tr>
-<th>Métrique</th>
-<th>Valeur</th>
-</tr>
-
-<tr>
-<td>Taux service</td>
-<td id="service2">0%</td>
-</tr>
-
-<tr>
-<td>Surstock</td>
-<td id="surstock2">0</td>
-</tr>
-
-<tr>
-<td>SKU total</td>
-<td id="sku2">0</td>
-</tr>
-
-</table>
 
 </div>
 
@@ -274,7 +274,15 @@ Stock Sécurité
 
 </div>
 
-<!-- INVENTORY TABLE -->
+<div class="workflow">
+
+<h3>Workflow réapprovisionnement</h3>
+
+Stock faible → Analyse acheteur → Commande fournisseur → Réception entrepôt → Mise à jour inventaire
+
+</div>
+
+<!-- INVENTAIRE -->
 
 <div class="inventory">
 
@@ -288,11 +296,11 @@ Stock Sécurité
 
 <th>SKU</th>
 <th>Description</th>
-<th>Stock</th>
+<th>Stock physique</th>
 <th>Net disponible</th>
-<th>Reorder</th>
-<th>ABC</th>
-<th>Status</th>
+<th>Seuil</th>
+<th>Classe ABC</th>
+<th>Statut</th>
 
 </tr>
 
@@ -334,6 +342,14 @@ reader.readAsArrayBuffer(e.target.files[0])
 
 }
 
+function classifyABC(stock){
+
+if(stock<100)return "A"
+if(stock<500)return "B"
+return "C"
+
+}
+
 function processData(data){
 
 let rupture=0
@@ -342,7 +358,12 @@ let actions=0
 let security=0
 
 const tbody=document.querySelector("#inventoryTable tbody")
+const commandes=document.getElementById("tableCommandes")
+const ruptures=document.getElementById("tableRuptures")
+
 tbody.innerHTML=""
+commandes.innerHTML=""
+ruptures.innerHTML=""
 
 data.forEach(item=>{
 
@@ -353,19 +374,37 @@ let net=stock
 let status="OK"
 let className="status-ok"
 
+let abc=classifyABC(stock)
+
 if(net<reorder){
 
-status="Réapprovisionnement"
+status="Réapprovisionnement requis"
 className="status-risk"
 
 rupture++
 actions++
 
+commandes.innerHTML+=`
+<tr>
+<td>${item.sku}</td>
+<td>${item.description}</td>
+<td>${stock}</td>
+<td>${reorder}</td>
+</tr>`
+
+ruptures.innerHTML+=`
+<tr>
+<td>${item.sku}</td>
+<td>${item.description}</td>
+<td>${stock}</td>
+<td>${reorder}</td>
+</tr>`
+
 }
 
 else if(stock>reorder*2){
 
-status="Surstock"
+status="Surstockage"
 className="status-sur"
 
 surstock++
@@ -374,24 +413,28 @@ surstock++
 
 security+=reorder
 
-let row=document.createElement("tr")
+tbody.innerHTML+=`
 
-row.innerHTML=`
+<tr>
+
 <td>${item.sku}</td>
 <td>${item.description}</td>
 <td>${stock}</td>
 <td>${net}</td>
 <td>${reorder}</td>
-<td>-</td>
+<td>${abc}</td>
 <td class="${className}">${status}</td>
-`
 
-tbody.appendChild(row)
+</tr>
+
+`
 
 })
 
 let total=data.length
+
 let service=((total-rupture)/total*100).toFixed(1)
+let ruptureRate=((rupture)/total*100).toFixed(1)
 
 document.getElementById("totalSKU").innerText=total
 document.getElementById("rupture").innerText=rupture
@@ -399,12 +442,7 @@ document.getElementById("surstock").innerText=surstock
 document.getElementById("actions").innerText=actions
 document.getElementById("service").innerText=service+"%"
 document.getElementById("security").innerText=security
-
-document.getElementById("actions2").innerText=actions
-document.getElementById("rupture2").innerText=rupture
-document.getElementById("service2").innerText=service+"%"
-document.getElementById("surstock2").innerText=surstock
-document.getElementById("sku2").innerText=total
+document.getElementById("ruptureRate").innerText=ruptureRate+"%"
 
 drawCharts(rupture,surstock,total)
 
@@ -445,5 +483,4 @@ datasets:[{data:[rupture,surstock,ok]}]
 </script>
 
 </body>
-
 </html>
