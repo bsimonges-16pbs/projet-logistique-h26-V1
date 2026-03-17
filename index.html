@@ -3,7 +3,6 @@
 
 <head>
 <meta charset="UTF-8">
-
 <title>WarehouseOps</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -14,10 +13,7 @@ body{
 font-family:Arial;
 background:#f4f6f9;
 margin:0;
-padding:0;
 }
-
-/* HEADER */
 
 header{
 background:#2c3e50;
@@ -26,18 +22,13 @@ padding:20px;
 text-align:center;
 }
 
-.version{
-font-size:14px;
-opacity:0.8;
+.version-bar{
+margin-top:10px;
 }
-
-/* CONTAINER */
 
 .container{
 padding:20px;
 }
-
-/* KPI GRID */
 
 .kpi-grid{
 display:grid;
@@ -51,38 +42,27 @@ padding:20px;
 border-radius:10px;
 color:white;
 text-align:center;
-box-shadow:0 3px 8px rgba(0,0,0,0.15);
 }
+
+.kpi-total{background:#3498db;}
+.kpi-rupture{background:#e74c3c;}
+.kpi-surstock{background:#f39c12;}
+.kpi-commandes{background:#27ae60;}
 
 .kpi h2{
 margin:0;
-font-size:36px;
+font-size:32px;
 }
 
-.kpi p{
-margin:5px;
-font-weight:bold;
+.controls{
+display:flex;
+gap:15px;
+margin-bottom:20px;
 }
 
-/* COLORS */
-
-.kpi-total{
-background:#3498db;
+input,select{
+padding:8px;
 }
-
-.kpi-rupture{
-background:#e74c3c;
-}
-
-.kpi-surstock{
-background:#f39c12;
-}
-
-.kpi-commandes{
-background:#27ae60;
-}
-
-/* TABLE */
 
 table{
 width:100%;
@@ -93,35 +73,19 @@ background:white;
 th,td{
 padding:10px;
 border-bottom:1px solid #ddd;
-font-size:14px;
 }
 
 th{
 background:#34495e;
 color:white;
+cursor:pointer;
 }
 
-.status-ok{
-color:green;
-font-weight:bold;
-}
-
-.status-risk{
-color:red;
-font-weight:bold;
-}
-
-.status-surstock{
-color:#e67e22;
-font-weight:bold;
-}
-
-.upload{
-margin-bottom:20px;
-}
+.status-ok{color:green;font-weight:bold;}
+.status-risk{color:red;font-weight:bold;}
+.status-surstock{color:#e67e22;font-weight:bold;}
 
 </style>
-
 </head>
 
 <body>
@@ -130,17 +94,32 @@ margin-bottom:20px;
 
 <h1>WarehouseOps Dashboard</h1>
 
-<div class="version">
-Version V1.0
+<div class="version-bar">
+
+Version actuelle :
+
+<select id="versionSelect">
+
+<option>V1.1</option>
+<option>V1.0</option>
+
+</select>
+
 </div>
 
 </header>
 
 <div class="container">
 
-<div class="upload">
+<div class="controls">
 
-<input type="file" id="excelFile"/>
+<input type="file" id="excelFile">
+
+<input type="text" id="searchBox" placeholder="Rechercher SKU ou produit">
+
+<select id="categoryFilter">
+<option value="all">Toutes catégories</option>
+</select>
 
 </div>
 
@@ -153,7 +132,7 @@ Version V1.0
 
 <div class="kpi kpi-rupture">
 <h2 id="rupture">0</h2>
-<p>Articles en rupture</p>
+<p>Ruptures</p>
 </div>
 
 <div class="kpi kpi-surstock">
@@ -173,21 +152,21 @@ Version V1.0
 <thead>
 
 <tr>
-<th>SKU</th>
+
+<th onclick="sortTable(0)">SKU</th>
 <th>Description</th>
 <th>Catégorie</th>
-<th>Stock</th>
-<th>Reorder Point</th>
+<th onclick="sortTable(3)">Stock</th>
+<th onclick="sortTable(4)">Reorder</th>
 <th>EOQ</th>
 <th>Status</th>
 <th>Quantité suggérée</th>
+
 </tr>
 
 </thead>
 
-<tbody>
-
-</tbody>
+<tbody></tbody>
 
 </table>
 
@@ -195,31 +174,51 @@ Version V1.0
 
 <script>
 
-const fileInput = document.getElementById('excelFile')
+let globalData=[]
 
-fileInput.addEventListener('change', handleFile)
+document.getElementById("excelFile").addEventListener("change",loadFile)
+document.getElementById("searchBox").addEventListener("input",filterTable)
+document.getElementById("categoryFilter").addEventListener("change",filterTable)
 
-function handleFile(e){
+function loadFile(e){
 
-const file = e.target.files[0]
+const file=e.target.files[0]
+const reader=new FileReader()
 
-const reader = new FileReader()
+reader.onload=function(evt){
 
-reader.onload = function(evt){
+const data=new Uint8Array(evt.target.result)
+const workbook=XLSX.read(data,{type:'array'})
+const sheet=workbook.Sheets[workbook.SheetNames[0]]
 
-const data = new Uint8Array(evt.target.result)
+globalData=XLSX.utils.sheet_to_json(sheet)
 
-const workbook = XLSX.read(data,{type:'array'})
+populateCategories()
 
-const sheet = workbook.Sheets[workbook.SheetNames[0]]
-
-const json = XLSX.utils.sheet_to_json(sheet)
-
-processData(json)
+processData(globalData)
 
 }
 
 reader.readAsArrayBuffer(file)
+
+}
+
+function populateCategories(){
+
+let categories=[...new Set(globalData.map(i=>i.category))]
+
+let select=document.getElementById("categoryFilter")
+
+categories.forEach(c=>{
+
+let option=document.createElement("option")
+
+option.value=c
+option.text=c
+
+select.appendChild(option)
+
+})
 
 }
 
@@ -229,49 +228,40 @@ let rupture=0
 let surstock=0
 let commandes=0
 
-const tableBody = document.querySelector("#inventoryTable tbody")
-
-tableBody.innerHTML=""
+const tbody=document.querySelector("#inventoryTable tbody")
+tbody.innerHTML=""
 
 data.forEach(item=>{
 
-let stock = item.stock_physical || 0
-
-let reorder = item.reorder_point || 0
-
-let eoq = item.EOQ || 0
-
-let suggested = item.qty_suggested || 0
+let stock=item.stock_physical||0
+let reorder=item.reorder_point||0
+let eoq=item.EOQ||0
+let suggested=item.qty_suggested||0
 
 let status="OK"
-
 let className="status-ok"
 
-if(stock < reorder){
+if(stock<reorder){
 
 status="RUPTURE / COMMANDER"
-
 className="status-risk"
-
 rupture++
-
 commandes++
 
 }
 
-else if(stock > eoq*2){
+else if(stock>eoq*2){
 
 status="SURSTOCK"
-
 className="status-surstock"
-
 surstock++
 
 }
 
-const row = document.createElement("tr")
+let row=document.createElement("tr")
 
-row.innerHTML = `
+row.innerHTML=`
+
 <td>${item.sku}</td>
 <td>${item.description}</td>
 <td>${item.category}</td>
@@ -280,19 +270,51 @@ row.innerHTML = `
 <td>${eoq}</td>
 <td class="${className}">${status}</td>
 <td>${suggested}</td>
+
 `
 
-tableBody.appendChild(row)
+tbody.appendChild(row)
 
 })
 
 document.getElementById("totalSKU").innerText=data.length
-
 document.getElementById("rupture").innerText=rupture
-
 document.getElementById("surstock").innerText=surstock
-
 document.getElementById("commandes").innerText=commandes
+
+}
+
+function filterTable(){
+
+let search=document.getElementById("searchBox").value.toLowerCase()
+let category=document.getElementById("categoryFilter").value
+
+let filtered=globalData.filter(item=>{
+
+let matchSearch=(item.sku+" "+item.description+" "+item.category).toLowerCase().includes(search)
+
+let matchCategory=(category==="all"||item.category===category)
+
+return matchSearch&&matchCategory
+
+})
+
+processData(filtered)
+
+}
+
+function sortTable(col){
+
+let table=document.getElementById("inventoryTable")
+let rows=Array.from(table.rows).slice(1)
+
+rows.sort((a,b)=>{
+
+return a.cells[col].innerText.localeCompare(b.cells[col].innerText)
+
+})
+
+rows.forEach(r=>table.appendChild(r))
 
 }
 
