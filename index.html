@@ -2,29 +2,28 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>WarehouseOps V2.9</title>
+<title>WarehouseOps V2.4</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body { margin:0; font-family:Arial; display:flex; }
+body { font-family: Arial; margin:0; display:flex; }
 
 /* SIDEBAR */
 .sidebar {
-  width:260px;
+  width:220px;
   background:#1e293b;
   color:white;
   padding:15px;
 }
 
 .menu {
-  padding:12px;
+  padding:10px;
   margin:10px 0;
   border-radius:8px;
   cursor:pointer;
 }
+
 .menu:hover { background:#334155; }
 
 /* CONTENT */
@@ -32,7 +31,13 @@ body { margin:0; font-family:Arial; display:flex; }
 
 /* KPI */
 .kpi { display:flex; gap:10px; }
-.card { padding:15px; border-radius:10px; color:white; flex:1; }
+
+.card {
+  padding:15px;
+  border-radius:10px;
+  color:white;
+  flex:1;
+}
 
 .blue { background:#3b82f6; }
 .green { background:#22c55e; }
@@ -42,48 +47,23 @@ body { margin:0; font-family:Arial; display:flex; }
 table { width:100%; border-collapse: collapse; }
 td, th { border:1px solid #ccc; padding:8px; text-align:center; }
 
-/* STATUS */
 .ok { color:green; font-weight:bold; }
 .alert { color:red; font-weight:bold; }
-
-/* VERSION BAR */
-.version-bar {
-  background:#0f172a;
-  color:white;
-  padding:10px;
-  overflow:hidden;
-  white-space:nowrap;
-}
-.scroll-text {
-  display:inline-block;
-  animation: scroll 20s linear infinite;
-}
-@keyframes scroll {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
-}
 </style>
 </head>
 
 <body>
 
 <div class="sidebar">
-<h2>WarehouseOps V2.9</h2>
+<h2>WarehouseOps V2.4</h2>
 
-<div class="menu" onclick="show('dashboard')">📊 Tableau de bord</div>
+<div class="menu" onclick="show('dashboard')">📊 Dashboard</div>
 <div class="menu" onclick="show('articles')">📦 Articles</div>
 <div class="menu" onclick="show('po')">🧾 Demandes</div>
 <div class="menu" onclick="show('uml')">📐 UML</div>
 </div>
 
 <div class="content">
-
-<!-- VERSION BAR -->
-<div class="version-bar">
-<div class="scroll-text">
-Version V1 → V2.0 → V2.4 → V2.7 → ✅ V2.9 DATA-DRIVEN (Excel réel + KPI + PO + UX améliorée)
-</div>
-</div>
 
 <!-- DASHBOARD -->
 <div id="dashboard">
@@ -100,16 +80,21 @@ Version V1 → V2.0 → V2.4 → V2.7 → ✅ V2.9 DATA-DRIVEN (Excel réel + KP
 
 <!-- ARTICLES -->
 <div id="articles" style="display:none">
-<h1>📦 Articles</h1>
+<h1>📦 Articles (CRUD)</h1>
 
-<input type="file" onchange="uploadExcel(event)">
+<input id="sku" placeholder="SKU">
+<input id="stock" type="number" placeholder="Stock physique">
+<input id="transit" type="number" placeholder="Transit">
+<input id="reserve" type="number" placeholder="Réservé">
+<input id="seuil" type="number" placeholder="Seuil minimum">
+
+<button onclick="addArticle()">Ajouter</button>
 
 <table>
 <thead>
 <tr>
-<th>SKU</th><th>Description</th><th>Catégorie</th>
-<th>Stock</th><th>Transit</th><th>Réservé</th>
-<th>Net</th><th>Seuil</th><th>Statut</th>
+<th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
+<th>Net</th><th>Seuil</th><th>Statut</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="articlesTable"></tbody>
@@ -130,10 +115,12 @@ Version V1 → V2.0 → V2.4 → V2.7 → ✅ V2.9 DATA-DRIVEN (Excel réel + KP
 
 <!-- UML -->
 <div id="uml" style="display:none">
-<h1>📐 Diagramme UML</h1>
+<h1>📐 Processus UML</h1>
 
-<canvas id="umlCanvas" width="500" height="300"></canvas>
-<button onclick="exportPDF()">Exporter PDF</button>
+<p><b>AS-IS :</b> Manuel → erreurs → pas d’alerte</p>
+<p><b>TO-BE :</b> Système → calcul automatique → alerte → PO</p>
+
+<canvas id="umlCanvas" width="500" height="200"></canvas>
 </div>
 
 </div>
@@ -143,96 +130,109 @@ Version V1 → V2.0 → V2.4 → V2.7 → ✅ V2.9 DATA-DRIVEN (Excel réel + KP
 let articles = [];
 let pos = [];
 
-/* NAV */
+/* NAVIGATION */
 function show(p){
   document.querySelectorAll(".content > div").forEach(d=>d.style.display="none");
   document.getElementById(p).style.display="block";
 }
 
-/* EXCEL DATA-DRIVEN */
-function uploadExcel(e){
-  let reader = new FileReader();
+/* CALCUL BNMP */
+function calcNet(a){
+  return a.stock + a.transit - a.reserve;
+}
 
-  reader.onload = function(evt){
-    let data = new Uint8Array(evt.target.result);
-    let wb = XLSX.read(data,{type:'array'});
-    let sheet = wb.Sheets[wb.SheetNames[0]];
-    let raw = XLSX.utils.sheet_to_json(sheet);
+/* STATUT */
+function getStatus(a){
+  return calcNet(a) < a.seuil ? "À commander" : "OK";
+}
 
-    articles = raw.map(row => ({
-      sku: row["sku"],
-      description: row["description"],
-      category: row["category"],
-      stock: Number(row["stock_physical"] || 0),
-      transit: Number(row["in_transit"] || 0),
-      reserve: Number(row["reserved"] || 0),
-      net: Number(row["net_available"] || 0),
-      seuil: Number(row["seuil_min"] || 0),
-      status: row["BNMP_message"] || "OK",
-      suggested: Number(row["qty_suggested"] || 0)
-    }));
+/* AJOUT ARTICLE */
+function addArticle(){
 
-    pos = articles
-      .filter(a => a.status === "À commander")
-      .map(a => ({
-        sku: a.sku,
-        qty: a.suggested,
-        status: "À valider"
-      }));
-
-    alert("✅ Dataset Excel chargé (mode PRO)");
-    render();
+  let a = {
+    sku: sku.value,
+    stock: Number(stock.value),
+    transit: Number(transit.value),
+    reserve: Number(reserve.value),
+    seuil: Number(seuil.value)
   };
 
-  reader.readAsArrayBuffer(e.target.files[0]);
+  articles.push(a);
+
+  generatePO(a);
+
+  render();
+}
+
+/* GENERATION PO */
+function generatePO(a){
+  let net = calcNet(a);
+
+  if(net < a.seuil){
+    pos.push({
+      sku: a.sku,
+      qty: (a.seuil - net) + 5,
+      status: "Brouillon"
+    });
+  }
 }
 
 /* RENDER */
 function render(){
 
   let html="";
-  articles.forEach(a=>{
-    html+=`
+  articles.forEach((a,i)=>{
+    let net = calcNet(a);
+    let st = getStatus(a);
+
+    html += `
     <tr>
       <td>${a.sku}</td>
-      <td>${a.description}</td>
-      <td>${a.category}</td>
       <td>${a.stock}</td>
       <td>${a.transit}</td>
       <td>${a.reserve}</td>
-      <td>${a.net}</td>
+      <td>${net}</td>
       <td>${a.seuil}</td>
-      <td class="${a.status==='OK'?'ok':'alert'}">${a.status}</td>
+      <td class="${st==='OK'?'ok':'alert'}">${st}</td>
+      <td><button onclick="deleteArticle(${i})">X</button></td>
     </tr>`;
   });
-  articlesTable.innerHTML=html;
+
+  articlesTable.innerHTML = html;
 
   let poHTML="";
   pos.forEach(p=>{
-    poHTML+=`
+    poHTML += `
     <tr>
       <td>${p.sku}</td>
       <td>${p.qty}</td>
       <td>${p.status}</td>
     </tr>`;
   });
-  poTable.innerHTML=poHTML;
+
+  poTable.innerHTML = poHTML;
 
   updateKPI();
 }
 
+/* DELETE */
+function deleteArticle(i){
+  articles.splice(i,1);
+  render();
+}
+
 /* KPI */
 function updateKPI(){
-  let total=articles.length;
-  let ok=articles.filter(a=>a.status=="OK").length;
-  let alert=articles.filter(a=>a.status=="À commander").length;
+  let total = articles.length;
+  let ok = articles.filter(a=>getStatus(a)=="OK").length;
+  let alert = total - ok;
 
-  kpi_total.innerHTML="Total: "+total;
-  kpi_ok.innerHTML="OK: "+ok;
-  kpi_alert.innerHTML="Alertes: "+alert;
+  kpi_total.innerHTML = "Total: " + total;
+  kpi_ok.innerHTML = "OK: " + ok;
+  kpi_alert.innerHTML = "Alertes: " + alert;
 
   new Chart(document.getElementById("chart"),{
-    type:"doughnut",
+    type:"pie",
     data:{
       labels:["OK","À commander"],
       datasets:[{ data:[ok,alert] }]
@@ -240,21 +240,16 @@ function updateKPI(){
   });
 }
 
-/* UML */
+/* UML DRAW */
 function drawUML(){
   let ctx = document.getElementById("umlCanvas").getContext("2d");
-  ctx.fillText("Stock → Analyse Excel → Alerte → PO → Validation",50,150);
+
+  ctx.fillText("Magasinier → Saisie → Système → Calcul → Acheteur → PO", 20,100);
 }
 drawUML();
 
-/* PDF */
-function exportPDF(){
-  const { jsPDF } = window.jspdf;
-  let pdf = new jsPDF();
-  pdf.text("UML WarehouseOps V2.9",10,10);
-  pdf.text("Flux : Excel → Analyse → PO → Validation",10,30);
-  pdf.save("uml.pdf");
-}
+/* INIT */
+render();
 
 </script>
 
