@@ -2,209 +2,255 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIAG Entrepôt – Version Finale</title>
+<title>SIAG - Gestion Stock BNMP</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; color: #333; }
-h1 { text-align: center; color: #1a73e8; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-th { background: #1a73e8; color: white; }
-tr:nth-child(even) { background: #f2f2f2; }
-.kpi { display: flex; justify-content: space-around; margin-top: 20px; }
-.kpi div { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.filters, .trs, .abc-eoq, .journal { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.filters label, .trs label { margin-right: 20px; }
-.highlight { background: #ffcccc !important; }
+body {
+    font-family: Arial;
+    margin:0;
+    background:#f4f6f9;
+}
+header {
+    background:#2c3e50;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+nav {
+    display:flex;
+    background:#34495e;
+}
+nav button {
+    flex:1;
+    padding:15px;
+    border:none;
+    background:#34495e;
+    color:white;
+    cursor:pointer;
+}
+nav button:hover {
+    background:#2c3e50;
+}
+.container {
+    padding:20px;
+}
+.card {
+    background:white;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+table {
+    width:100%;
+    border-collapse:collapse;
+}
+th, td {
+    padding:10px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+.ok {color:green; font-weight:bold;}
+.alert {color:red; font-weight:bold;}
+input {
+    padding:8px;
+    margin:5px;
+}
+button.action {
+    padding:8px 12px;
+    margin:2px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+.add {background:#27ae60; color:white;}
+.delete {background:#e74c3c; color:white;}
 </style>
 </head>
+
 <body>
 
-<h1>SIAG Entrepôt – Version Finale</h1>
+<header>
+<h1>📦 SIAG - Gestion de Stock (BNMP)</h1>
+</header>
 
-<div class="filters">
-<label>Classe:
-    <select id="filterClasse"><option value="">Toutes</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
-</label>
-<label>Statut Fournisseur:
-    <select id="filterSupplier"><option value="">Tous</option><option value="active">Actif</option><option value="inactive">Inactif</option></select>
-</label>
+<nav>
+<button onclick="showTab('articles')">📦 Articles</button>
+<button onclick="showTab('dashboard')">📊 Dashboard</button>
+<button onclick="showTab('process')">🔄 Processus</button>
+</nav>
+
+<div class="container">
+
+<!-- ARTICLES -->
+<div id="articles" class="tab">
+
+<div class="card">
+<h3>Ajouter un article</h3>
+
+<input id="sku" placeholder="SKU">
+<input id="stock" type="number" placeholder="Stock">
+<input id="transit" type="number" placeholder="Transit">
+<input id="reserve" type="number" placeholder="Réservé">
+<input id="seuil" type="number" placeholder="Seuil min">
+
+<button class="action add" onclick="addArticle()">Ajouter</button>
 </div>
 
-<div class="kpi">
-<div id="ruptureKPI">Ruptures: 0</div>
-<div id="serviceKPI">Service: 0%</div>
-</div>
+<div class="card">
+<h3>Liste des articles</h3>
 
-<div class="trs">
-<h3>TRS – Performance Entrepôt</h3>
-<label>Temps planifié: <input type="number" id="temps_planifie" value="480"></label>
-<label>Arrêts: <input type="number" id="arrets" value="30"></label>
-<label>Cadence théorique (/h): <input type="number" id="cadence" value="50"></label>
-<label>Qté totale: <input type="number" id="quantite_totale" value="2000"></label>
-<label>Qté bonne: <input type="number" id="quantite_bonne" value="1950"></label>
-<button onclick="calculateTRS()">Calculer TRS</button>
-<div id="trsResult"></div>
-</div>
-
-<div class="abc-eoq">
-<h3>Segmentation ABC + EOQ</h3>
-<table id="abcTable">
-<thead>
-<tr><th>SKU</th><th>Valeur Annuelle</th><th>Classe</th><th>EOQ</th></tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-
-<table id="stockTable">
+<table id="table">
 <thead>
 <tr>
-<th>SKU</th><th>Stock Physique</th><th>Transit</th><th>Réservé</th><th>Seuil Min</th>
-<th>Net Disponible</th><th>Statut</th><th>Suggestion</th><th>Classe</th>
-<th>EOQ</th><th>Fournisseur</th><th>Statut Fournisseur</th>
-<th>D</th><th>Consommation</th><th>S</th><th>H</th>
+<th>SKU</th>
+<th>Stock</th>
+<th>Transit</th>
+<th>Réservé</th>
+<th>Net</th>
+<th>Seuil</th>
+<th>Statut</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<div class="journal">
-<h3>Journal des événements</h3>
-<table id="journalTable">
-<thead><tr><th>Date</th><th>Type</th><th>Détails</th></tr></thead>
-<tbody></tbody>
-</table>
+</div>
+
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="tab" style="display:none;">
+<div class="card">
+<h3>KPI</h3>
+<p>Total articles: <span id="total"></span></p>
+<p>À commander: <span id="alertCount"></span></p>
+</div>
+
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+</div>
+
+<!-- PROCESS -->
+<div id="process" class="tab" style="display:none;">
+<div class="card">
+<h3>Processus UML</h3>
+
+<p><strong>AS-IS :</strong></p>
+<ul>
+<li>Magasinier vérifie stock manuellement</li>
+<li>Décision humaine</li>
+<li>Pas d’automatisation</li>
+</ul>
+
+<p><strong>TO-BE :</strong></p>
+<ul>
+<li>Système calcule Net automatiquement</li>
+<li>Génération automatique des demandes d’achat</li>
+<li>Acheteur valide</li>
+</ul>
+
+</div>
+</div>
+
 </div>
 
 <script>
-// ===========================
-// Dataset Exemple – remplacer par import réel
-// ===========================
-const excelData = [
-{sku:"SKU001",stock_physical:50,in_transit:20,reserved:10,seuil_min:40,net_available:60,BNMP_message:"OK",qty_suggested:20,ABC_class:"A",EOQ:50,supplier_id:"F001",supplier_status:"active",annual_demand_D:500,daily_consumption:10,order_cost_S:50,holding_cost_H:5},
-{sku:"SKU002",stock_physical:10,in_transit:0,reserved:5,seuil_min:15,net_available:5,BNMP_message:"ALERTE",qty_suggested:50,ABC_class:"A",EOQ:40,supplier_id:"F002",supplier_status:"inactive",annual_demand_D:300,daily_consumption:8,order_cost_S:40,holding_cost_H:4}
+
+let articles = [];
+
+// IMPORT EXCEL (simulation avec données intégrées)
+articles = [
+{sku:"A100", stock:50, transit:10, reserve:30, seuil:40},
+{sku:"A200", stock:20, transit:5, reserve:30, seuil:25},
+{sku:"A300", stock:100, transit:0, reserve:20, seuil:50}
 ];
 
-// ===========================
-// Mapping
-// ===========================
-function mapData(row){
-return {
-sku:row.sku, stock:row.stock_physical, transit:row.in_transit, reserve:row.reserved, seuil:row.seuil_min,
-net:row.net_available, statut:row.BNMP_message, suggestion:row.qty_suggested,
-classe:row.ABC_class, eoq:row.EOQ,
-supplier:row.supplier_id, supplier_status:row.supplier_status,
-D:row.annual_demand_D, conso:row.daily_consumption,
-S:row.order_cost_S, H:row.holding_cost_H
+function calculateNet(a){
+return a.stock + a.transit - a.reserve;
+}
+
+function getStatus(a){
+return calculateNet(a) >= a.seuil ? "OK" : "À commander";
+}
+
+function addArticle(){
+let a = {
+sku:document.getElementById("sku").value,
+stock:Number(document.getElementById("stock").value),
+transit:Number(document.getElementById("transit").value),
+reserve:Number(document.getElementById("reserve").value),
+seuil:Number(document.getElementById("seuil").value)
 };
+articles.push(a);
+render();
 }
 
-// ===========================
-// PO Draft + Journal
-// ===========================
-const journal = [];
-function logEvent(type, details){ 
-    const date=new Date().toLocaleString();
-    journal.push({date,type,details}); updateJournalTable();
+function deleteArticle(i){
+articles.splice(i,1);
+render();
 }
 
-function POExist(sku){ return journal.some(j=>j.type==="PO_CREATED" && j.details.sku===sku && j.details.status==="Brouillon"); }
+function render(){
 
-function createPOBrouillon(article){
-    logEvent("PO_CREATED",{sku:article.sku, qty:article.suggestion, status:"Brouillon"});
+let tbody = document.querySelector("#table tbody");
+tbody.innerHTML = "";
+
+let alertCount = 0;
+
+articles.forEach((a,i)=>{
+
+let net = calculateNet(a);
+let status = getStatus(a);
+
+if(status==="À commander") alertCount++;
+
+let row = `
+<tr>
+<td>${a.sku}</td>
+<td>${a.stock}</td>
+<td>${a.transit}</td>
+<td>${a.reserve}</td>
+<td>${net}</td>
+<td>${a.seuil}</td>
+<td class="${status==='OK'?'ok':'alert'}">${status}</td>
+<td><button class="action delete" onclick="deleteArticle(${i})">Supprimer</button></td>
+</tr>
+`;
+
+tbody.innerHTML += row;
+});
+
+document.getElementById("total").innerText = articles.length;
+document.getElementById("alertCount").innerText = alertCount;
+
+drawChart(alertCount);
 }
 
-// ===========================
-// Process Articles
-// ===========================
-function processArticles(articles){
-    articles.forEach(a=>{
-        // PO automatique classe A
-        if(a.classe==="A" && a.net<a.seuil && a.supplier_status==="active"){
-            if(!POExist(a.sku)){ createPOBrouillon(a); }
-        }
-    });
-    // KPI
-    const rupture=articles.filter(a=>a.net<0).length;
-    const service=articles.filter(a=>a.statut==="OK").length/articles.length;
-    document.getElementById("ruptureKPI").innerText=`Ruptures: ${rupture}`;
-    document.getElementById("serviceKPI").innerText=`Service: ${(service*100).toFixed(2)}%`;
-    displayTable(articles); displayABC(articles);
+function drawChart(alertCount){
+let ok = articles.length - alertCount;
+
+new Chart(document.getElementById("chart"),{
+type:"pie",
+data:{
+labels:["OK","À commander"],
+datasets:[{
+data:[ok,alertCount],
+backgroundColor:["green","red"]
+}]
+}
+});
 }
 
-// ===========================
-// Display Stock Table
-// ===========================
-function displayTable(articles){
-    const tbody=document.querySelector("#stockTable tbody"); tbody.innerHTML="";
-    const filterClasse=document.getElementById("filterClasse").value;
-    const filterSupplier=document.getElementById("filterSupplier").value;
-    const filtered=articles.filter(a=>
-        (filterClasse===""||a.classe===filterClasse)&&(filterSupplier===""||a.supplier_status===filterSupplier)
-    );
-    filtered.forEach(a=>{
-        const tr=document.createElement("tr");
-        if(a.net<a.seuil) tr.classList.add("highlight");
-        tr.innerHTML=`<td>${a.sku}</td><td>${a.stock}</td><td>${a.transit}</td><td>${a.reserve}</td><td>${a.seuil}</td>
-        <td>${a.net}</td><td>${a.statut}</td><td>${a.suggestion}</td><td>${a.classe}</td><td>${a.eoq}</td>
-        <td>${a.supplier}</td><td>${a.supplier_status}</td><td>${a.D}</td><td>${a.conso}</td><td>${a.S}</td><td>${a.H}</td>`;
-        tbody.appendChild(tr);
-    });
+function showTab(tab){
+document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
+document.getElementById(tab).style.display="block";
 }
 
-// ===========================
-// TRS Calcul
-// ===========================
-function calculateTRS(){
-    const t_plan=parseFloat(document.getElementById("temps_planifie").value);
-    const arrets=parseFloat(document.getElementById("arrets").value);
-    const cadence=parseFloat(document.getElementById("cadence").value);
-    const q_total=parseFloat(document.getElementById("quantite_totale").value);
-    const q_bonne=parseFloat(document.getElementById("quantite_bonne").value);
-    const dispo=(t_plan-arrets)/t_plan;
-    const perf=q_total/(cadence*(t_plan-arrets));
-    const qual=q_bonne/q_total;
-    const trs=(dispo*perf*qual*100).toFixed(2);
-    document.getElementById("trsResult").innerText=`TRS: ${trs}% (Disponibilité:${(dispo*100).toFixed(1)}%, Performance:${(perf*100).toFixed(1)}%, Qualité:${(qual*100).toFixed(1)}%)`;
-}
+render();
 
-// ===========================
-// ABC + EOQ
-// ===========================
-function displayABC(articles){
-    const tbody=document.querySelector("#abcTable tbody"); tbody.innerHTML="";
-    articles.forEach(a=>{
-        const val_annuelle=a.D*a.S;
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${a.sku}</td><td>${val_annuelle.toFixed(2)}</td><td>${a.classe}</td><td>${a.eoq}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// ===========================
-// Journal Display
-// ===========================
-function updateJournalTable(){
-    const tbody=document.querySelector("#journalTable tbody"); tbody.innerHTML="";
-    journal.forEach(j=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${j.date}</td><td>${j.type}</td><td>${JSON.stringify(j.details)}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// ===========================
-// Event Filter
-// ===========================
-document.getElementById("filterClasse").addEventListener("change",()=>displayTable(mappedData));
-document.getElementById("filterSupplier").addEventListener("change",()=>displayTable(mappedData));
-
-// ===========================
-// Initialisation
-// ===========================
-const mappedData=excelData.map(mapData);
-processArticles(mappedData);
 </script>
 
 </body>
