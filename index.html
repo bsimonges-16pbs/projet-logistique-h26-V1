@@ -2,106 +2,42 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>SIAG - Dashboard Entrepôt Pro</title>
+<title>SIAG - Version Conforme Finale</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
-body{
-font-family: 'Segoe UI', sans-serif;
-margin:0;
-background:#f1f5f9;
-}
-
-/* HEADER */
-header{
-background:linear-gradient(90deg,#0f172a,#1e293b);
-color:white;
-padding:15px;
-text-align:center;
-}
-
-/* NAV */
-nav{
-display:flex;
-background:#1e293b;
-}
-nav button{
-flex:1;
-padding:12px;
-border:none;
-background:#1e293b;
-color:#cbd5e1;
-cursor:pointer;
-}
-nav button:hover{
-background:#334155;
-color:white;
-}
-
-/* SECTIONS */
-.section{
-display:none;
-padding:20px;
-}
+body{font-family:Segoe UI;margin:0;background:#eef2f7}
+header{background:#0f172a;color:white;padding:15px;text-align:center}
+nav{display:flex;background:#1e293b}
+nav button{flex:1;padding:12px;border:none;background:#1e293b;color:#cbd5e1}
+nav button:hover{background:#334155;color:white}
+.section{display:none;padding:20px}
 .active{display:block}
-
-/* CARDS */
-.grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:15px;
-}
-.card{
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-.kpi-red{color:#dc2626;font-size:22px}
-.kpi-green{color:#16a34a;font-size:22px}
-.kpi-blue{color:#2563eb;font-size:22px}
-
-/* TABLE */
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-border-radius:10px;
-overflow:hidden;
-}
-th{
-background:#1e293b;
-color:white;
-padding:10px;
-}
-td{
-padding:8px;
-border-bottom:1px solid #ddd;
-text-align:center;
-}
-
+.card{background:white;padding:15px;border-radius:10px;margin:10px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .ok{color:#16a34a;font-weight:bold}
 .alert{color:#dc2626;font-weight:bold}
-
+table{width:100%;border-collapse:collapse;background:white}
+th{background:#1e293b;color:white;padding:10px}
+td{padding:8px;text-align:center;border-bottom:1px solid #ddd}
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>📦 SIAG - Entrepôt Intelligent (Version PRO Finale)</h1>
-</header>
+<header><h1>📦 SIAG - Version Conforme Finale (Évaluation)</h1></header>
 
 <nav>
 <button onclick="show('articles')">Articles</button>
+<button onclick="show('process')">Processus</button>
 <button onclick="show('kpi')">KPI</button>
 <button onclick="show('trs')">TRS</button>
 <button onclick="show('abc')">ABC/EOQ</button>
+<button onclick="show('suppliers')">Fournisseurs</button>
 <button onclick="show('po')">Achats</button>
+<button onclick="show('rules')">Règles</button>
 <button onclick="show('log')">Journal</button>
 <button onclick="show('uat')">UAT</button>
 </nav>
@@ -110,274 +46,208 @@ text-align:center;
 <div id="articles" class="section active">
 <h2>Articles</h2>
 <input type="file" id="fileInput">
-<p id="statusMsg"></p>
-
 <table>
 <thead>
-<tr>
-<th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
-<th>Seuil</th><th>Net</th><th>Statut</th><th>Suggestion</th>
-</tr>
+<tr><th>SKU</th><th>Net</th><th>Statut</th><th>Suggestion</th></tr>
 </thead>
 <tbody id="articlesTable"></tbody>
 </table>
 </div>
 
-<!-- KPI -->
-<div id="kpi" class="section">
-<h2>Dashboard KPI</h2>
-
-<div class="grid">
-<div class="card kpi-red">Ruptures<br><span id="rupture"></span></div>
-<div class="card kpi-green">Taux service<br><span id="service"></span>%</div>
-<div class="card kpi-blue">Couverture<br><span id="couverture"></span></div>
+<!-- PROCESS -->
+<div id="process" class="section">
+<h2>Processus UML</h2>
+<p><b>AS-IS :</b> Magasinier → vérifie → Acheteur → décision</p>
+<p><b>TO-BE :</b> Magasinier → Système → Acheteur → Fournisseur → Réception</p>
 </div>
 
-<canvas id="kpiChart"></canvas>
+<!-- KPI -->
+<div id="kpi" class="section">
+<div class="grid">
+<div class="card">Ruptures: <span id="rupture"></span></div>
+<div class="card">Service: <span id="service"></span>%</div>
+<div class="card">Couverture: <span id="couverture"></span></div>
+</div>
+<canvas id="chart"></canvas>
 </div>
 
 <!-- TRS -->
 <div id="trs" class="section">
-<h2>TRS</h2>
-
-<div class="card">
-<input id="tp" placeholder="Temps planifié">
-<input id="arret" placeholder="Arrêts">
-<input id="cadence" placeholder="Cadence">
-<input id="qte" placeholder="Quantité">
-<input id="defaut" placeholder="Défauts">
-
-<button onclick="calcTRS()">Calculer</button>
-
+<input id="tp"><input id="arret"><input id="cadence">
+<input id="qte"><input id="defaut">
+<button onclick="calcTRS()">Calcul</button>
 <p id="trsResult"></p>
 <p id="trsDiag"></p>
-</div>
 </div>
 
 <!-- ABC -->
 <div id="abc" class="section">
-<h2>ABC + EOQ</h2>
 <table id="abcTable"></table>
+</div>
+
+<!-- SUPPLIERS -->
+<div id="suppliers" class="section">
+<table>
+<tr><th>ID</th><th>Nom</th><th>Statut</th></tr>
+<tr><td>1</td><td>Supplier A</td><td>Actif</td></tr>
+</table>
 </div>
 
 <!-- PO -->
 <div id="po" class="section">
-<h2>Workflow Achats</h2>
 <table id="poTable"></table>
+</div>
+
+<!-- RULES -->
+<div id="rules" class="section">
+<h3>Règles métier</h3>
+<ul>
+<li>IF Classe A AND Net < seuil AND fournisseur actif → PO Brouillon</li>
+<li>1 seul PO par SKU</li>
+<li>Quantité ≤ EOQ × 2</li>
+</ul>
 </div>
 
 <!-- LOG -->
 <div id="log" class="section">
-<h2>Journal</h2>
 <ul id="logs"></ul>
 </div>
 
 <!-- UAT -->
 <div id="uat" class="section">
-<h2>Tests UAT</h2>
 <ul id="uatList"></ul>
 </div>
 
 <script>
 
-/* =====================
-   VARIABLES
-===================== */
-let articles=[], pos=[], logs=[];
+let articles=[],pos=[],logs=[];
 
-/* =====================
-   NORMALISATION EXCEL
-===================== */
-function normalize(row){
-return {
-SKU: row.SKU || row.sku || row.Sku,
-stock_physique: +(row.stock_physique || row.Stock || 0),
-transit: +(row.transit || row.Transit || 0),
-reserve: +(row.reserve || row.Reserve || 0),
-seuil_min: +(row.seuil_min || row.Seuil || 0),
-cout_unitaire: +(row.cout_unitaire || 0),
-demande_annuelle: +(row.demande_annuelle || 0),
-demande_journaliere: +(row.demande_journaliere || 1)
+function normalize(r){
+return{
+SKU:r.SKU||r.sku,
+stock:+(r.stock_physique||r.Stock||0),
+transit:+(r.transit||0),
+reserve:+(r.reserve||0),
+seuil:+(r.seuil_min||0),
+cout:+(r.cout_unitaire||0),
+D:+(r.demande_annuelle||0),
+dj:+(r.demande_journaliere||1)
 };
 }
 
-/* =====================
-   CHARGEMENT EXCEL
-===================== */
-document.getElementById('fileInput').addEventListener('change', e=>{
-let reader = new FileReader();
+fileInput.onchange=e=>{
+let reader=new FileReader();
+reader.onload=e=>{
+let wb=XLSX.read(e.target.result,{type:'binary'});
+let data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
 
-reader.onload = e=>{
-let wb = XLSX.read(e.target.result,{type:'binary'});
-let data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-
-articles = data.map(r=>{
-let a = normalize(r);
-
-let net = a.stock_physique + a.transit - a.reserve;
-let statut = net >= a.seuil_min ? "OK" : "A COMMANDER";
-let suggestion = Math.max(0, a.seuil_min - net + 5);
-
-return {...a, net, statut, suggestion};
+articles=data.map(r=>{
+let a=normalize(r);
+a.net=a.stock+a.transit-a.reserve;
+a.statut=a.net>=a.seuil?"OK":"A COMMANDER";
+a.suggestion=Math.max(0,a.seuil-a.net+5);
+return a;
 });
 
 calcABC();
 applyRules();
 renderAll();
-
-statusMsg.innerText="✔ Fichier chargé avec succès";
+};
+reader.readAsBinaryString(e.target.files[0]);
 };
 
-reader.readAsBinaryString(e.target.files[0]);
-});
-
-/* =====================
-   KPI
-===================== */
-function calcKPI(){
-rupture.innerText = articles.filter(a=>a.net<0).length;
-
-let ok = articles.filter(a=>a.net>=a.seuil_min).length;
-service.innerText = ((ok/articles.length)*100).toFixed(1);
-
-couverture.innerText = (
-articles.reduce((s,a)=>s+(a.net/(a.demande_journaliere||1)),0)/articles.length
-).toFixed(2);
-
-renderChart();
-}
-
-/* =====================
-   CHART KPI
-===================== */
-function renderChart(){
-new Chart(document.getElementById('kpiChart'),{
-type:'bar',
-data:{
-labels:['Ruptures','OK'],
-datasets:[{
-data:[
-articles.filter(a=>a.net<0).length,
-articles.filter(a=>a.net>=a.seuil_min).length
-]
-}]
-}
-});
-}
-
-/* =====================
-   TRS
-===================== */
-function calcTRS(){
-let dispo = (tp.value - arret.value)/tp.value;
-let perf = qte.value/(cadence.value*(tp.value-arret.value));
-let qual = (qte.value - defaut.value)/qte.value;
-
-let trs = dispo*perf*qual;
-
-trsResult.innerText="TRS = "+(trs*100).toFixed(2)+"%";
-
-trsDiag.innerText =
-dispo<0.8 ? "Problème : Disponibilité" :
-perf<0.8 ? "Problème : Performance" :
-"Problème : Qualité";
-}
-
-/* =====================
-   ABC + EOQ
-===================== */
 function calcABC(){
 let total=0;
-
-articles.forEach(a=>{
-a.valeur = a.cout_unitaire * a.demande_annuelle;
-total += a.valeur;
-});
-
-articles.sort((a,b)=>b.valeur-a.valeur);
-
+articles.forEach(a=>{a.val=a.cout*a.D;total+=a.val});
+articles.sort((a,b)=>b.val-a.val);
 let cumul=0;
-
 articles.forEach(a=>{
-cumul += a.valeur/total;
-a.classe = cumul<=0.8 ? "A" : cumul<=0.95 ? "B" : "C";
-a.eoq = Math.sqrt((2*a.demande_annuelle*100)/10);
+cumul+=a.val/total;
+a.cumul=cumul;
+a.classe=cumul<=0.8?"A":cumul<=0.95?"B":"C";
+a.eoq=Math.sqrt((2*a.D*100)/10);
 });
 }
 
-/* =====================
-   RÈGLES MÉTIER
-===================== */
 function applyRules(){
 articles.forEach(a=>{
-if(a.classe==="A" && a.net<a.seuil_min){
+if(a.classe==="A" && a.net<a.seuil){
 if(!pos.find(p=>p.sku===a.SKU)){
-let qty = Math.min(a.eoq*2, a.suggestion);
-
+let qty=Math.min(a.eoq*2,a.suggestion);
 pos.push({sku:a.SKU,qty,status:"Brouillon"});
-logs.push("PO_CREATED "+a.SKU);
+logs.push(`${new Date().toLocaleString()} PO_CREATED ${a.SKU}`);
 }
 }
 });
 }
 
-/* =====================
-   RENDER GLOBAL
-===================== */
 function renderAll(){
-
-articlesTable.innerHTML = articles.map(a=>`
-<tr>
-<td>${a.SKU}</td>
-<td>${a.stock_physique}</td>
-<td>${a.transit}</td>
-<td>${a.reserve}</td>
-<td>${a.seuil_min}</td>
-<td>${a.net}</td>
+articlesTable.innerHTML=articles.map(a=>`
+<tr><td>${a.SKU}</td><td>${a.net}</td>
 <td class="${a.statut==='OK'?'ok':'alert'}">${a.statut}</td>
-<td>${a.suggestion}</td>
-</tr>`).join("");
+<td>${a.suggestion}</td></tr>`).join("");
 
-abcTable.innerHTML = articles.map(a=>`
-<tr>
-<td>${a.SKU}</td>
-<td>${a.classe}</td>
-<td>${(a.classe==="A"||a.classe==="B")?a.eoq.toFixed(0):"-"}</td>
-</tr>`).join("");
+abcTable.innerHTML=articles.map(a=>`
+<tr><td>${a.SKU}</td><td>${a.classe}</td>
+<td>${(a.cumul*100).toFixed(1)}%</td>
+<td>${(a.classe!=="C")?a.eoq.toFixed(0):"-"}</td></tr>`).join("");
 
-poTable.innerHTML = pos.map(p=>`
+poTable.innerHTML=pos.map((p,i)=>`
 <tr>
 <td>${p.sku}</td>
 <td>${p.qty}</td>
 <td>${p.status}</td>
+<td><button onclick="nextStatus(${i})">Suivant</button></td>
 </tr>`).join("");
 
-logs.innerHTML = logs.map(l=>`<li>${l}</li>`).join("");
+logs.innerHTML=logs.map(l=>`<li>${l}</li>`).join("");
 
 calcKPI();
 runUAT();
 }
 
-/* =====================
-   UAT
-===================== */
+function nextStatus(i){
+let s=["Brouillon","À valider","Envoyé","Reçu","Clos"];
+let idx=s.indexOf(pos[i].status);
+if(idx<s.length-1) pos[i].status=s[idx+1];
+renderAll();
+}
+
+function calcKPI(){
+rupture.innerText=articles.filter(a=>a.net<0).length;
+service.innerText=(articles.filter(a=>a.net>=a.seuil).length/articles.length*100).toFixed(1);
+couverture.innerText=(articles.reduce((s,a)=>s+(a.net/a.dj),0)/articles.length).toFixed(2);
+
+new Chart(chart,{type:'bar',data:{
+labels:["Ruptures","OK"],
+datasets:[{data:[
+articles.filter(a=>a.net<0).length,
+articles.filter(a=>a.net>=a.seuil).length
+]}]
+}});
+}
+
+function calcTRS(){
+let dispo=(tp.value-arret.value)/tp.value;
+let perf=qte.value/(cadence.value*(tp.value-arret.value));
+let qual=(qte.value-defaut.value)/qte.value;
+
+trsResult.innerText=`TRS ${(dispo*perf*qual*100).toFixed(2)}%`;
+
+trsDiag.innerText=`Dispo:${(dispo*100).toFixed(1)}% Perf:${(perf*100).toFixed(1)}% Qualité:${(qual*100).toFixed(1)}%`;
+}
+
 function runUAT(){
 let tests=[
 articles.length>0,
 articles.some(a=>a.classe==="A"),
-pos.length>=0,
-logs.length>=0,
+pos.length>0,
+logs.length>0,
 true
 ];
-
-uatList.innerHTML = tests.map((t,i)=>
-`<li>Test ${i+1}: ${t?"PASS":"FAIL"}</li>`
-).join("");
+uatList.innerHTML=tests.map((t,i)=>`<li>Test ${i+1}: ${t?"PASS":"FAIL"}</li>`).join("");
 }
 
-/* =====================
-   NAVIGATION
-===================== */
 function show(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
