@@ -3,198 +3,208 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Stock – Version Finale Excel</title>
+<title>SIAG Entrepôt – Version Finale</title>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; color: #333; }
-    h1 { text-align: center; color: #1a73e8; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background: #1a73e8; color: white; }
-    tr:nth-child(even) { background: #f2f2f2; }
-    .kpi { display: flex; justify-content: space-around; margin-top: 20px; }
-    .kpi div { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    select { margin: 10px 0; padding: 5px; }
+body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; color: #333; }
+h1 { text-align: center; color: #1a73e8; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+th { background: #1a73e8; color: white; }
+tr:nth-child(even) { background: #f2f2f2; }
+.kpi { display: flex; justify-content: space-around; margin-top: 20px; }
+.kpi div { background: #fff; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.filters, .trs, .abc-eoq, .journal { margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.filters label, .trs label { margin-right: 20px; }
+.highlight { background: #ffcccc !important; }
 </style>
 </head>
 <body>
 
-<h1>Dashboard Stock – Version Finale Excel</h1>
+<h1>SIAG Entrepôt – Version Finale</h1>
 
 <div class="filters">
-    <label>Filtrer par Classe:
-        <select id="filterClasse">
-            <option value="">Toutes</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-        </select>
-    </label>
-    <label>Filtrer par Statut Fournisseur:
-        <select id="filterSupplier">
-            <option value="">Tous</option>
-            <option value="active">Actif</option>
-            <option value="inactive">Inactif</option>
-        </select>
-    </label>
+<label>Classe:
+    <select id="filterClasse"><option value="">Toutes</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
+</label>
+<label>Statut Fournisseur:
+    <select id="filterSupplier"><option value="">Tous</option><option value="active">Actif</option><option value="inactive">Inactif</option></select>
+</label>
 </div>
 
 <div class="kpi">
-    <div id="ruptureKPI">Ruptures: 0</div>
-    <div id="serviceKPI">Service: 0%</div>
+<div id="ruptureKPI">Ruptures: 0</div>
+<div id="serviceKPI">Service: 0%</div>
+</div>
+
+<div class="trs">
+<h3>TRS – Performance Entrepôt</h3>
+<label>Temps planifié: <input type="number" id="temps_planifie" value="480"></label>
+<label>Arrêts: <input type="number" id="arrets" value="30"></label>
+<label>Cadence théorique (/h): <input type="number" id="cadence" value="50"></label>
+<label>Qté totale: <input type="number" id="quantite_totale" value="2000"></label>
+<label>Qté bonne: <input type="number" id="quantite_bonne" value="1950"></label>
+<button onclick="calculateTRS()">Calculer TRS</button>
+<div id="trsResult"></div>
+</div>
+
+<div class="abc-eoq">
+<h3>Segmentation ABC + EOQ</h3>
+<table id="abcTable">
+<thead>
+<tr><th>SKU</th><th>Valeur Annuelle</th><th>Classe</th><th>EOQ</th></tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
 
 <table id="stockTable">
-    <thead>
-        <tr>
-            <th>SKU</th>
-            <th>Stock Physique</th>
-            <th>En Transit</th>
-            <th>Réservé</th>
-            <th>Seuil Min</th>
-            <th>Net Disponible</th>
-            <th>Statut</th>
-            <th>Suggestion</th>
-            <th>Classe</th>
-            <th>EOQ</th>
-            <th>Fournisseur</th>
-            <th>Status Fournisseur</th>
-            <th>D</th>
-            <th>Consommation</th>
-            <th>S</th>
-            <th>H</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+<th>SKU</th><th>Stock Physique</th><th>Transit</th><th>Réservé</th><th>Seuil Min</th>
+<th>Net Disponible</th><th>Statut</th><th>Suggestion</th><th>Classe</th>
+<th>EOQ</th><th>Fournisseur</th><th>Statut Fournisseur</th>
+<th>D</th><th>Consommation</th><th>S</th><th>H</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
+
+<div class="journal">
+<h3>Journal des événements</h3>
+<table id="journalTable">
+<thead><tr><th>Date</th><th>Type</th><th>Détails</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
 
 <script>
 // ===========================
-// Exemple de dataset Excel
-// Remplace par ton import réel
+// Dataset Exemple – remplacer par import réel
 // ===========================
 const excelData = [
-    {
-        sku: "SKU001", stock_physical: 50, in_transit: 20, reserved: 10, seuil_min: 40,
-        net_available: 60, BNMP_message: "OK", qty_suggested: 20,
-        ABC_class: "A", EOQ: 50, supplier_id: "F001", supplier_status: "active",
-        annual_demand_D: 500, daily_consumption: 10, order_cost_S: 50, holding_cost_H: 5
-    },
-    {
-        sku: "SKU002", stock_physical: 10, in_transit: 0, reserved: 5, seuil_min: 15,
-        net_available: 5, BNMP_message: "ALERTE", qty_suggested: 50,
-        ABC_class: "A", EOQ: 40, supplier_id: "F002", supplier_status: "inactive",
-        annual_demand_D: 300, daily_consumption: 8, order_cost_S: 40, holding_cost_H: 4
-    }
-    // Ajoute toutes tes lignes Excel ici
+{sku:"SKU001",stock_physical:50,in_transit:20,reserved:10,seuil_min:40,net_available:60,BNMP_message:"OK",qty_suggested:20,ABC_class:"A",EOQ:50,supplier_id:"F001",supplier_status:"active",annual_demand_D:500,daily_consumption:10,order_cost_S:50,holding_cost_H:5},
+{sku:"SKU002",stock_physical:10,in_transit:0,reserved:5,seuil_min:15,net_available:5,BNMP_message:"ALERTE",qty_suggested:50,ABC_class:"A",EOQ:40,supplier_id:"F002",supplier_status:"inactive",annual_demand_D:300,daily_consumption:8,order_cost_S:40,holding_cost_H:4}
 ];
 
 // ===========================
-// Mapping des données
+// Mapping
 // ===========================
-function mapData(row) {
-    return {
-        sku: row.sku,
-        stock: row.stock_physical,
-        transit: row.in_transit,
-        reserve: row.reserved,
-        seuil: row.seuil_min,
-
-        net: row.net_available,
-        statut: row.BNMP_message,
-        suggestion: row.qty_suggested,
-
-        classe: row.ABC_class,
-        eoq: row.EOQ,
-
-        supplier: row.supplier_id,
-        supplier_status: row.supplier_status,
-
-        D: row.annual_demand_D,
-        conso: row.daily_consumption,
-
-        S: row.order_cost_S,
-        H: row.holding_cost_H
-    };
+function mapData(row){
+return {
+sku:row.sku, stock:row.stock_physical, transit:row.in_transit, reserve:row.reserved, seuil:row.seuil_min,
+net:row.net_available, statut:row.BNMP_message, suggestion:row.qty_suggested,
+classe:row.ABC_class, eoq:row.EOQ,
+supplier:row.supplier_id, supplier_status:row.supplier_status,
+D:row.annual_demand_D, conso:row.daily_consumption,
+S:row.order_cost_S, H:row.holding_cost_H
+};
 }
 
 // ===========================
-// Création PO (logique métier)
+// PO Draft + Journal
 // ===========================
-function createPO(article) {
-    console.log(`PO créé pour SKU ${article.sku} — qty: ${article.suggestion}`);
+const journal = [];
+function logEvent(type, details){ 
+    const date=new Date().toLocaleString();
+    journal.push({date,type,details}); updateJournalTable();
+}
+
+function POExist(sku){ return journal.some(j=>j.type==="PO_CREATED" && j.details.sku===sku && j.details.status==="Brouillon"); }
+
+function createPOBrouillon(article){
+    logEvent("PO_CREATED",{sku:article.sku, qty:article.suggestion, status:"Brouillon"});
 }
 
 // ===========================
-// Traitement articles & KPI
+// Process Articles
 // ===========================
-function processArticles(articles) {
-    articles.forEach(a => {
-        if (a.classe === "A" && a.net < a.seuil && a.supplier_status === "active") {
-            createPO(a);
+function processArticles(articles){
+    articles.forEach(a=>{
+        // PO automatique classe A
+        if(a.classe==="A" && a.net<a.seuil && a.supplier_status==="active"){
+            if(!POExist(a.sku)){ createPOBrouillon(a); }
         }
     });
-
     // KPI
-    const rupture = articles.filter(a => a.net < 0).length;
-    const service = articles.filter(a => a.statut === "OK").length / articles.length;
-
-    document.getElementById("ruptureKPI").innerText = `Ruptures: ${rupture}`;
-    document.getElementById("serviceKPI").innerText = `Service: ${(service*100).toFixed(2)}%`;
-
-    displayTable(articles);
+    const rupture=articles.filter(a=>a.net<0).length;
+    const service=articles.filter(a=>a.statut==="OK").length/articles.length;
+    document.getElementById("ruptureKPI").innerText=`Ruptures: ${rupture}`;
+    document.getElementById("serviceKPI").innerText=`Service: ${(service*100).toFixed(2)}%`;
+    displayTable(articles); displayABC(articles);
 }
 
 // ===========================
-// Affichage tableau filtrable
+// Display Stock Table
 // ===========================
-function displayTable(articles) {
-    const tbody = document.querySelector("#stockTable tbody");
-    tbody.innerHTML = "";
-
-    const filterClasse = document.getElementById("filterClasse").value;
-    const filterSupplier = document.getElementById("filterSupplier").value;
-
-    const filtered = articles.filter(a => 
-        (filterClasse === "" || a.classe === filterClasse) &&
-        (filterSupplier === "" || a.supplier_status === filterSupplier)
+function displayTable(articles){
+    const tbody=document.querySelector("#stockTable tbody"); tbody.innerHTML="";
+    const filterClasse=document.getElementById("filterClasse").value;
+    const filterSupplier=document.getElementById("filterSupplier").value;
+    const filtered=articles.filter(a=>
+        (filterClasse===""||a.classe===filterClasse)&&(filterSupplier===""||a.supplier_status===filterSupplier)
     );
-
-    filtered.forEach(a => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${a.sku}</td>
-            <td>${a.stock}</td>
-            <td>${a.transit}</td>
-            <td>${a.reserve}</td>
-            <td>${a.seuil}</td>
-            <td>${a.net}</td>
-            <td>${a.statut}</td>
-            <td>${a.suggestion}</td>
-            <td>${a.classe}</td>
-            <td>${a.eoq}</td>
-            <td>${a.supplier}</td>
-            <td>${a.supplier_status}</td>
-            <td>${a.D}</td>
-            <td>${a.conso}</td>
-            <td>${a.S}</td>
-            <td>${a.H}</td>
-        `;
+    filtered.forEach(a=>{
+        const tr=document.createElement("tr");
+        if(a.net<a.seuil) tr.classList.add("highlight");
+        tr.innerHTML=`<td>${a.sku}</td><td>${a.stock}</td><td>${a.transit}</td><td>${a.reserve}</td><td>${a.seuil}</td>
+        <td>${a.net}</td><td>${a.statut}</td><td>${a.suggestion}</td><td>${a.classe}</td><td>${a.eoq}</td>
+        <td>${a.supplier}</td><td>${a.supplier_status}</td><td>${a.D}</td><td>${a.conso}</td><td>${a.S}</td><td>${a.H}</td>`;
         tbody.appendChild(tr);
     });
 }
 
 // ===========================
-// Filtrage dynamique
+// TRS Calcul
 // ===========================
-document.getElementById("filterClasse").addEventListener("change", () => displayTable(mappedData));
-document.getElementById("filterSupplier").addEventListener("change", () => displayTable(mappedData));
+function calculateTRS(){
+    const t_plan=parseFloat(document.getElementById("temps_planifie").value);
+    const arrets=parseFloat(document.getElementById("arrets").value);
+    const cadence=parseFloat(document.getElementById("cadence").value);
+    const q_total=parseFloat(document.getElementById("quantite_totale").value);
+    const q_bonne=parseFloat(document.getElementById("quantite_bonne").value);
+    const dispo=(t_plan-arrets)/t_plan;
+    const perf=q_total/(cadence*(t_plan-arrets));
+    const qual=q_bonne/q_total;
+    const trs=(dispo*perf*qual*100).toFixed(2);
+    document.getElementById("trsResult").innerText=`TRS: ${trs}% (Disponibilité:${(dispo*100).toFixed(1)}%, Performance:${(perf*100).toFixed(1)}%, Qualité:${(qual*100).toFixed(1)}%)`;
+}
+
+// ===========================
+// ABC + EOQ
+// ===========================
+function displayABC(articles){
+    const tbody=document.querySelector("#abcTable tbody"); tbody.innerHTML="";
+    articles.forEach(a=>{
+        const val_annuelle=a.D*a.S;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${a.sku}</td><td>${val_annuelle.toFixed(2)}</td><td>${a.classe}</td><td>${a.eoq}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// ===========================
+// Journal Display
+// ===========================
+function updateJournalTable(){
+    const tbody=document.querySelector("#journalTable tbody"); tbody.innerHTML="";
+    journal.forEach(j=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${j.date}</td><td>${j.type}</td><td>${JSON.stringify(j.details)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+// ===========================
+// Event Filter
+// ===========================
+document.getElementById("filterClasse").addEventListener("change",()=>displayTable(mappedData));
+document.getElementById("filterSupplier").addEventListener("change",()=>displayTable(mappedData));
 
 // ===========================
 // Initialisation
 // ===========================
-const mappedData = excelData.map(mapData);
+const mappedData=excelData.map(mapData);
 processArticles(mappedData);
-
 </script>
 
 </body>
