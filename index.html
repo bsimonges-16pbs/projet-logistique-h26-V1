@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ENTREPÔT PowerVACA-V3.0</title>
+  <title>ENTREPÔT PowerVACA-V3.1 PRO</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -503,13 +503,13 @@
   <header>
     <div class="header-wrap">
       <div class="title-wrap">
-        <div class="logo">📦</div>
+        <div class="logo">📊</div>
         <div>
-          <h1>ENTREPÔT PowerVACA-V3 EXPERT</h1>
+          <h1>📊 ENTREPÔT PowerVACA-V3.1 PRO</h1>
           <div class="subtitle">SIAG final — BNMP, KPI, TRS, ABC, EOQ, Fournisseurs, PO, Automatisation, Audit et UAT</div>
         </div>
       </div>
-      <div class="version-badge">Version officielle : V3 EXPERT</div>
+      <div class="version-badge">Version officielle : V3.1 PRO</div>
     </div>
   </header>
 
@@ -802,24 +802,30 @@
             <tbody>
               <tr>
                 <td>R1</td>
-                <td>Classe = A AND Net &lt; seuil_min AND supplier actif</td>
-                <td>Créer PO Brouillon + Tâche validation + Log</td>
-                <td>1 seul PO brouillon par SKU</td>
+                <td>BNMP = À commander AND fournisseur actif</td>
+                <td>Créer PO auto</td>
+                <td>1 seul PO ouvert par SKU</td>
               </tr>
               <tr>
                 <td>R2</td>
+                <td>Classe ≠ A</td>
+                <td>Créer PO au statut “À valider”</td>
+                <td>Validation manuelle requise</td>
+              </tr>
+              <tr>
+                <td>R3</td>
                 <td>Quantité demandée &gt; EOQ × 2</td>
                 <td>Bloquer validation simple</td>
                 <td>Validation spéciale requise</td>
               </tr>
               <tr>
-                <td>R3</td>
+                <td>R4</td>
                 <td>Supplier inactif</td>
-                <td>Ne pas auto-créer de PO standard</td>
+                <td>Ne pas auto-créer de PO</td>
                 <td>Journaliser alerte</td>
               </tr>
               <tr>
-                <td>R4</td>
+                <td>R5</td>
                 <td>PO statut = Reçu</td>
                 <td>Autoriser clôture</td>
                 <td>Historiser l’événement</td>
@@ -903,9 +909,9 @@
             <div class="uml-arrow">↓</div>
             <div class="decision"><span>Net &lt; seuil ?</span></div>
             <div class="uml-arrow">Oui ↓</div>
-            <div class="uml-node red">Vérifier classe A et fournisseur actif</div>
+            <div class="uml-node red">Vérifier fournisseur actif</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node orange">Créer PO Brouillon + tâche validation</div>
+            <div class="uml-node orange">Créer PO Brouillon / À valider</div>
             <div class="uml-arrow">↓</div>
             <div class="uml-node">Journaliser l’événement</div>
           </div>
@@ -1006,7 +1012,7 @@
         utilisateur: currentUser,
         details
       });
-      if (auditLogs.length > 300) auditLogs = auditLogs.slice(0, 300);
+      if (auditLogs.length > 500) auditLogs = auditLogs.slice(0, 500);
     }
 
     function sanitizeArticle(raw) {
@@ -1198,6 +1204,11 @@
             statut: a.supplier_status || "actif",
             taux_conformite: 95
           }));
+        } else {
+          const existing = map.get(a.supplier_id);
+          if (!existing.nom) existing.nom = `Fournisseur ${a.supplier_id}`;
+          if (!existing.delai_moyen_jours) existing.delai_moyen_jours = a.lead_time_days || 0;
+          if (!existing.statut) existing.statut = a.supplier_status || "actif";
         }
       });
       suppliers = [...map.values()];
@@ -1208,6 +1219,7 @@
     }
 
     function getEffectiveSupplierStatus(article) {
+      if (!article.supplier_id) return article.supplier_status || "actif";
       const sup = findSupplierById(article.supplier_id);
       return sup ? sup.statut : (article.supplier_status || "actif");
     }
@@ -1223,40 +1235,69 @@
       );
     }
 
+    function shouldCreatePO(article) {
+      const supplierStatus = getEffectiveSupplierStatus(article);
+      return article.BNMP_message === "À commander" && supplierStatus === "actif";
+    }
+
+    function buildPO(article) {
+      const qtyBase = article.qty_suggested;
+      const maxNoValidation = article.EOQ > 0 ? article.EOQ * 2 : qtyBase * 2;
+      const requiresSpecialValidation = article.EOQ > 0 && qtyBase > maxNoValidation;
+
+      let statut = "Brouillon";
+      let controlMessage = "PO généré automatiquement";
+
+      if (article.ABC_class !== "A") {
+        statut = "À valider";
+        controlMessage = "Article hors classe A : validation manuelle requise";
+      }
+
+      if (requiresSpecialValidation) {
+        statut = "À valider";
+        controlMessage = "Validation spéciale requise (qty > EOQ × 2)";
+      }
+
+      return {
+        po_id: generatePOId(),
+        sku: article.sku,
+        qty: qtyBase,
+        supplier_id: article.supplier_id || "N/A",
+        date: todayStr(),
+        statut,
+        abc_class: article.ABC_class,
+        eoq: article.EOQ,
+        requires_special_validation: requiresSpecialValidation,
+        control_message: controlMessage
+      };
+    }
+
     function rebuildAutomationFromScratch() {
       purchaseOrders = [];
+
       articles.forEach(article => {
         const supplierStatus = getEffectiveSupplierStatus(article);
-        const needsOrder =
-          article.ABC_class === "A" &&
-          article.net_available < article.seuil_min &&
-          supplierStatus === "actif";
 
-        if (needsOrder) {
-          const qtyBase = article.qty_suggested;
-          const maxNoValidation = article.EOQ > 0 ? article.EOQ * 2 : qtyBase * 2;
-          const requiresSpecialValidation = qtyBase > maxNoValidation;
-
-          const po = {
-            po_id: generatePOId(),
-            sku: article.sku,
-            qty: qtyBase,
-            supplier_id: article.supplier_id || "N/A",
-            date: todayStr(),
-            statut: "Brouillon",
-            abc_class: article.ABC_class,
-            eoq: article.EOQ,
-            requires_special_validation: requiresSpecialValidation,
-            control_message: requiresSpecialValidation
-              ? "Validation spéciale requise (qty > EOQ x 2)"
-              : "Contrôle standard OK"
-          };
-
+        if (shouldCreatePO(article)) {
+          const po = buildPO(article);
           purchaseOrders.unshift(po);
-          logEvent("PO_CREATED", `PO Brouillon auto créé pour ${article.sku}, qty=${po.qty}, supplier=${po.supplier_id}`);
-          logEvent("VALIDATION_TASK_CREATED", `Tâche de validation créée pour ${article.sku}`);
-        } else if (article.net_available < article.seuil_min && supplierStatus !== "actif") {
-          logEvent("ALERT_SUPPLIER_INACTIVE", `Alerte : ${article.sku} nécessite un approvisionnement mais le fournisseur ${article.supplier_id || "N/A"} est inactif`);
+
+          logEvent(
+            "PO_CREATED",
+            `PO ${po.statut} créé pour ${article.sku}, qty=${po.qty}, supplier=${po.supplier_id}, classe=${article.ABC_class}`
+          );
+
+          if (po.statut === "À valider") {
+            logEvent(
+              "VALIDATION_TASK_CREATED",
+              `Tâche de validation créée pour ${article.sku} (${po.control_message})`
+            );
+          }
+        } else if (article.BNMP_message === "À commander" && supplierStatus !== "actif") {
+          logEvent(
+            "ALERT_SUPPLIER_INACTIVE",
+            `Alerte : ${article.sku} nécessite un approvisionnement mais le fournisseur ${article.supplier_id || "N/A"} est inactif`
+          );
         }
       });
     }
@@ -1350,9 +1391,9 @@
     }
 
     function renderPODraftCards() {
-      const drafts = purchaseOrders.filter(po => po.statut === "Brouillon");
+      const drafts = purchaseOrders.filter(po => po.statut === "Brouillon" || po.statut === "À valider");
       if (!drafts.length) {
-        el("poDraftCards").innerHTML = `<div class="note-box">Aucun PO Brouillon actif.</div>`;
+        el("poDraftCards").innerHTML = `<div class="note-box">Aucun PO actif.</div>`;
         return;
       }
 
@@ -1364,7 +1405,7 @@
             <div><strong>Quantité :</strong> ${po.qty}</div>
             <div><strong>Supplier :</strong> ${po.supplier_id}</div>
             <div><strong>Date :</strong> ${po.date}</div>
-            <div><strong>Statut :</strong> <span class="status-pill status-draft">${po.statut}</span></div>
+            <div><strong>Statut :</strong> <span class="status-pill ${po.statut === "À valider" ? "status-alert" : "status-draft"}">${po.statut}</span></div>
             <div><strong>Contrôle :</strong> ${po.control_message}</div>
           </div>
         </div>
@@ -1379,6 +1420,15 @@
         const po = existingOpenPOForSku(a.sku);
         const statusClass = a.BNMP_message === "OK" ? "status-ok" : "status-alert";
         const coverage = a.coverage_days === null ? "N/A" : `${a.coverage_days} j`;
+        let poBadge = "-";
+
+        if (po) {
+          let poClass = "status-draft";
+          if (po.statut === "À valider") poClass = "status-alert";
+          if (po.statut === "Envoyé" || po.statut === "Reçu") poClass = "status-sent";
+          if (po.statut === "Clos") poClass = "status-closed";
+          poBadge = `<span class="status-pill ${poClass}">${po.statut}</span>`;
+        }
 
         return `
           <tr>
@@ -1395,7 +1445,7 @@
             <td>${coverage}</td>
             <td>${a.ABC_class}</td>
             <td>${a.EOQ}</td>
-            <td>${po ? `<span class="status-pill status-draft">${po.statut}</span>` : "-"}</td>
+            <td>${poBadge}</td>
             <td>
               <div class="actions">
                 <button class="btn btn-warning" onclick="editArticle('${a.sku.replace(/'/g, "\\'")}')">Modifier</button>
@@ -1498,7 +1548,7 @@
     }
 
     function renderUAT() {
-      const case1 = purchaseOrders.some(po => po.statut === "Brouillon");
+      const case1 = purchaseOrders.some(po => po.statut === "Brouillon" || po.statut === "À valider");
       const case2 = (() => {
         const skuCounts = {};
         purchaseOrders
@@ -1511,8 +1561,8 @@
       const case5 = purchaseOrders.every(po => ["Brouillon", "À valider", "Envoyé", "Reçu", "Clos"].includes(po.statut));
 
       const cases = [
-        { title: "Cas 1", desc: "Création automatique d’un PO pour article A avec Net < seuil et fournisseur actif", pass: case1 },
-        { title: "Cas 2", desc: "Un seul PO brouillon / SKU tant qu’il n’est pas clos", pass: case2 },
+        { title: "Cas 1", desc: "Création automatique d’un PO pour article en alerte BNMP avec fournisseur actif", pass: case1 },
+        { title: "Cas 2", desc: "Un seul PO brouillon / validation par SKU tant qu’il n’est pas clos", pass: case2 },
         { title: "Cas 3", desc: "Journalisation automatique des événements critiques", pass: case3 },
         { title: "Cas 4", desc: "Blocage logique si fournisseur inactif", pass: case4 },
         { title: "Cas 5", desc: "Workflow PO respecte les statuts autorisés", pass: case5 }
@@ -1782,10 +1832,7 @@
       const po = purchaseOrders.find(x => x.po_id === poId);
       if (!po) return;
 
-      if (po.requires_special_validation && po.statut === "Brouillon") {
-        po.statut = "À valider";
-        logEvent("PO_PENDING_SPECIAL_VALIDATION", `PO ${po.po_id} passe à "À valider" à cause du garde-fou quantité`);
-      } else if (po.statut === "Brouillon") {
+      if (po.statut === "Brouillon") {
         po.statut = "À valider";
         logEvent("PO_SUBMITTED", `PO ${po.po_id} soumise à validation`);
       } else if (po.statut === "À valider") {
