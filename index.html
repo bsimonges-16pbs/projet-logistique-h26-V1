@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ENTREPÔT PowerVACA-V3.1 PRO</title>
+  <title>📊 ENTREPÔT PowerVACA-V3.2 PRO</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -75,7 +75,7 @@
     }
 
     .subtitle{
-      color:rgba(255,255,255,.88);
+      color:rgba(255,255,255,.9);
       margin-top:6px;
       font-size:.98rem;
     }
@@ -145,6 +145,12 @@
       line-height:1.5;
     }
 
+    .grid-6{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:16px;
+    }
+
     .grid-5{
       display:grid;
       grid-template-columns:repeat(5,1fr);
@@ -195,6 +201,7 @@
     .kpi.green{background:linear-gradient(135deg,#45d786,#2fbf71)}
     .kpi.orange{background:linear-gradient(135deg,#f6b64e,#f39c12)}
     .kpi.dark{background:linear-gradient(135deg,#516273,#34495e)}
+    .kpi.purple{background:linear-gradient(135deg,#8e63d2,#6f42c1)}
 
     .kpi .label{
       font-size:1rem;
@@ -339,8 +346,6 @@
     }
 
     .po-grid,
-    .supplier-grid,
-    .audit-grid,
     .uat-grid{
       display:grid;
       grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
@@ -377,6 +382,15 @@
       line-height:1.55;
     }
 
+    .diag-box{
+      background:#fbfdff;
+      border:1px dashed #b9d3e7;
+      border-radius:14px;
+      padding:14px;
+      color:#35526b;
+      line-height:1.6;
+    }
+
     .small-kpi{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -404,6 +418,7 @@
       font-weight:600;
     }
 
+    .as-is-grid,
     .swimlanes{
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -485,16 +500,16 @@
     }
 
     @media (max-width: 1300px){
-      .grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes{
+      .grid-6,.grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes,.as-is-grid{
         grid-template-columns:1fr 1fr;
       }
     }
 
     @media (max-width: 860px){
-      .grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes{
+      .grid-6,.grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes,.as-is-grid{
         grid-template-columns:1fr;
       }
-      h1{font-size:1.5rem}
+      h1{font-size:1.45rem}
       .kpi .value{font-size:1.55rem}
     }
   </style>
@@ -505,11 +520,11 @@
       <div class="title-wrap">
         <div class="logo">📊</div>
         <div>
-          <h1>📊 ENTREPÔT PowerVACA-V3.1 PRO</h1>
-          <div class="subtitle">SIAG final — BNMP, KPI, TRS, ABC, EOQ, Fournisseurs, PO, Automatisation, Audit et UAT</div>
+          <h1>📊 ENTREPÔT PowerVACA-V3.2 PRO</h1>
+          <div class="subtitle">SIAG final — BNMP, KPI, TRS, ABC, EOQ, Fournisseurs, PO, Automatisation, Audit, UAT et UML AS-IS / TO-BE</div>
         </div>
       </div>
-      <div class="version-badge">Version officielle : V3.1 PRO</div>
+      <div class="version-badge">Version officielle : V3.2 PRO</div>
     </div>
   </header>
 
@@ -526,7 +541,7 @@
 
   <main class="app">
     <section id="dashboard" class="tab active">
-      <div class="grid-5">
+      <div class="grid-6">
         <div class="kpi blue">
           <div class="label">Total SKU</div>
           <div class="value" id="kpiTotalSku">0</div>
@@ -552,6 +567,11 @@
           <div class="value" id="kpiActivePO">0</div>
           <div class="note">Brouillon, À valider, Envoyé ou Reçu</div>
         </div>
+        <div class="kpi purple">
+          <div class="label">Alertes actives éligibles</div>
+          <div class="value" id="kpiEligibleAlerts">0</div>
+          <div class="note">BNMP à commander + fournisseur actif</div>
+        </div>
       </div>
 
       <div class="grid-3" style="margin-top:16px;">
@@ -571,13 +591,18 @@
 
       <div class="grid-2" style="margin-top:16px;">
         <div class="card">
-          <h3 class="section-title">PO Draft générés automatiquement</h3>
+          <h3 class="section-title">PO générés automatiquement</h3>
           <div id="poDraftCards" class="po-grid"></div>
         </div>
         <div class="card">
-          <h3 class="section-title">Résumé décisionnel</h3>
-          <div class="note-box" id="summaryBox">Aucune donnée chargée.</div>
+          <h3 class="section-title">Diagnostic PO réel — fichier Excel</h3>
+          <div id="poDiagnosticBox" class="diag-box">Diagnostic en attente...</div>
         </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Résumé décisionnel</h3>
+        <div class="note-box" id="summaryBox">Aucune donnée chargée.</div>
       </div>
     </section>
 
@@ -891,6 +916,39 @@
 
     <section id="process" class="tab">
       <div class="card">
+        <h3 class="section-title">AS-IS — Processus actuel</h3>
+        <div class="as-is-grid">
+          <div class="lane">
+            <h4>MAGASINIER</h4>
+            <div class="uml-start"></div>
+            <div class="uml-node">Consulter stock manuellement</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node orange">Constater une rupture / besoin</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node">Transmettre l’information</div>
+          </div>
+
+          <div class="lane">
+            <h4>SYSTÈME</h4>
+            <div class="uml-node red">Peu ou pas d’automatisation</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node">Pas de calcul BNMP structuré</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node">Peu de traçabilité</div>
+          </div>
+
+          <div class="lane">
+            <h4>ACHETEUR</h4>
+            <div class="uml-node">Décision à l’instinct</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node orange">Commande manuelle</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-end"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
         <h3 class="section-title">TO-BE — Workflow achats intelligent</h3>
         <div class="swimlanes">
           <div class="lane">
@@ -938,6 +996,15 @@
     let auditLogs = [];
     let articleEditingIndex = null;
     let supplierEditingIndex = null;
+    let poDiagnostics = {
+      totalAlerts: 0,
+      activeSupplierAlerts: 0,
+      inactiveSupplierAlerts: 0,
+      createdPOs: 0,
+      blockedByGuard: 0,
+      activeStatusCount: 0,
+      inactiveStatusCount: 0
+    };
 
     let charts = {
       status: null,
@@ -959,7 +1026,7 @@
       },
       {
         sku: "FOOD-00097", description: "Bubble Wrap", category: "FOOD", uom: "UN",
-        supplier_id: "SUP-05", supplier_status: "actif", lead_time_days: 7,
+        supplier_id: "SUP-05", supplier_status: "active", lead_time_days: 7,
         unit_cost: 4.2, annual_demand_D: 2800, daily_consumption: 10.7,
         order_cost_S: 42, holding_cost_H: 1.4, safety_stock: 25, reorder_point: 56,
         seuil_min: 40, stock_physical: 95, in_transit: 14, reserved: 22,
@@ -975,7 +1042,7 @@
       },
       {
         sku: "MRO-00252", description: "Zip Ties", category: "MRO", uom: "UN",
-        supplier_id: "SUP-03", supplier_status: "inactif", lead_time_days: 10,
+        supplier_id: "SUP-03", supplier_status: "inactive", lead_time_days: 10,
         unit_cost: 14, annual_demand_D: 900, daily_consumption: 3.4,
         order_cost_S: 65, holding_cost_H: 2.8, safety_stock: 16, reorder_point: 31,
         seuil_min: 26, stock_physical: 7, in_transit: 2, reserved: 14,
@@ -985,9 +1052,9 @@
 
     const sampleSuppliers = [
       { supplier_id: "SUP-12", nom: "Tech Connect Supply", delai_moyen_jours: 5, statut: "actif", taux_conformite: 98 },
-      { supplier_id: "SUP-05", nom: "PackPlus Distribution", delai_moyen_jours: 7, statut: "actif", taux_conformite: 95 },
+      { supplier_id: "SUP-05", nom: "PackPlus Distribution", delai_moyen_jours: 7, statut: "active", taux_conformite: 95 },
       { supplier_id: "SUP-09", nom: "Warehouse Label Inc.", delai_moyen_jours: 4, statut: "actif", taux_conformite: 96 },
-      { supplier_id: "SUP-03", nom: "FastMRO Global", delai_moyen_jours: 10, statut: "inactif", taux_conformite: 89 }
+      { supplier_id: "SUP-03", nom: "FastMRO Global", delai_moyen_jours: 10, statut: "inactive", taux_conformite: 89 }
     ];
 
     const el = id => document.getElementById(id);
@@ -1003,6 +1070,13 @@
 
     function todayStr() {
       return new Date().toLocaleDateString("fr-CA");
+    }
+
+    function normalizeStatus(raw) {
+      const s = String(raw ?? "").trim().toLowerCase();
+      if (["actif", "active", "enabled", "enable", "yes", "oui", "1"].includes(s)) return "actif";
+      if (["inactif", "inactive", "disabled", "disable", "no", "non", "0"].includes(s)) return "inactif";
+      return s || "actif";
     }
 
     function logEvent(type, details) {
@@ -1022,7 +1096,7 @@
         category: String(raw.category ?? "").trim(),
         uom: String(raw.uom ?? "UN").trim() || "UN",
         supplier_id: String(raw.supplier_id ?? "").trim(),
-        supplier_status: String(raw.supplier_status ?? "actif").trim() || "actif",
+        supplier_status: normalizeStatus(raw.supplier_status ?? "actif"),
         lead_time_days: toNumber(raw.lead_time_days),
         unit_cost: toNumber(raw.unit_cost),
         annual_demand_D: toNumber(raw.annual_demand_D),
@@ -1045,7 +1119,7 @@
         supplier_id: String(raw.supplier_id ?? "").trim(),
         nom: String(raw.nom ?? "").trim(),
         delai_moyen_jours: toNumber(raw.delai_moyen_jours),
-        statut: String(raw.statut ?? "actif").trim() || "actif",
+        statut: normalizeStatus(raw.statut ?? "actif"),
         taux_conformite: toNumber(raw.taux_conformite, 95)
       };
     }
@@ -1193,7 +1267,7 @@
     }
 
     function syncSuppliersFromArticles() {
-      const map = new Map(suppliers.map(s => [s.supplier_id, s]));
+      const map = new Map(suppliers.map(s => [s.supplier_id, sanitizeSupplier(s)]));
       articles.forEach(a => {
         if (!a.supplier_id) return;
         if (!map.has(a.supplier_id)) {
@@ -1206,9 +1280,9 @@
           }));
         } else {
           const existing = map.get(a.supplier_id);
+          existing.statut = normalizeStatus(existing.statut || a.supplier_status || "actif");
           if (!existing.nom) existing.nom = `Fournisseur ${a.supplier_id}`;
           if (!existing.delai_moyen_jours) existing.delai_moyen_jours = a.lead_time_days || 0;
-          if (!existing.statut) existing.statut = a.supplier_status || "actif";
         }
       });
       suppliers = [...map.values()];
@@ -1219,9 +1293,9 @@
     }
 
     function getEffectiveSupplierStatus(article) {
-      if (!article.supplier_id) return article.supplier_status || "actif";
+      if (!article.supplier_id) return normalizeStatus(article.supplier_status || "actif");
       const sup = findSupplierById(article.supplier_id);
-      return sup ? sup.statut : (article.supplier_status || "actif");
+      return sup ? normalizeStatus(sup.statut) : normalizeStatus(article.supplier_status || "actif");
     }
 
     function generatePOId() {
@@ -1274,24 +1348,60 @@
 
     function rebuildAutomationFromScratch() {
       purchaseOrders = [];
+      poDiagnostics = {
+        totalAlerts: 0,
+        activeSupplierAlerts: 0,
+        inactiveSupplierAlerts: 0,
+        createdPOs: 0,
+        blockedByGuard: 0,
+        activeStatusCount: 0,
+        inactiveStatusCount: 0
+      };
+
+      auditLogs = auditLogs.filter(log => ![
+        "PO_CREATED",
+        "VALIDATION_TASK_CREATED",
+        "ALERT_SUPPLIER_INACTIVE",
+        "DIAGNOSTIC_PO"
+      ].includes(log.type_event));
 
       articles.forEach(article => {
         const supplierStatus = getEffectiveSupplierStatus(article);
 
+        if (supplierStatus === "actif") poDiagnostics.activeStatusCount++;
+        if (supplierStatus === "inactif") poDiagnostics.inactiveStatusCount++;
+
+        if (article.BNMP_message === "À commander") {
+          poDiagnostics.totalAlerts++;
+          if (supplierStatus === "actif") {
+            poDiagnostics.activeSupplierAlerts++;
+          } else {
+            poDiagnostics.inactiveSupplierAlerts++;
+          }
+        }
+
         if (shouldCreatePO(article)) {
-          const po = buildPO(article);
-          purchaseOrders.unshift(po);
+          const alreadyOpen = existingOpenPOForSku(article.sku);
+          if (!alreadyOpen) {
+            const po = buildPO(article);
+            purchaseOrders.unshift(po);
+            poDiagnostics.createdPOs++;
 
-          logEvent(
-            "PO_CREATED",
-            `PO ${po.statut} créé pour ${article.sku}, qty=${po.qty}, supplier=${po.supplier_id}, classe=${article.ABC_class}`
-          );
+            if (po.requires_special_validation) {
+              poDiagnostics.blockedByGuard++;
+            }
 
-          if (po.statut === "À valider") {
             logEvent(
-              "VALIDATION_TASK_CREATED",
-              `Tâche de validation créée pour ${article.sku} (${po.control_message})`
+              "PO_CREATED",
+              `PO ${po.statut} créé pour ${article.sku}, qty=${po.qty}, supplier=${po.supplier_id}, classe=${article.ABC_class}`
             );
+
+            if (po.statut === "À valider") {
+              logEvent(
+                "VALIDATION_TASK_CREATED",
+                `Tâche de validation créée pour ${article.sku} (${po.control_message})`
+              );
+            }
           }
         } else if (article.BNMP_message === "À commander" && supplierStatus !== "actif") {
           logEvent(
@@ -1300,6 +1410,11 @@
           );
         }
       });
+
+      logEvent(
+        "DIAGNOSTIC_PO",
+        `Diagnostic: alertes=${poDiagnostics.totalAlerts}, alertes fournisseur actif=${poDiagnostics.activeSupplierAlerts}, alertes fournisseur inactif=${poDiagnostics.inactiveSupplierAlerts}, PO créés=${poDiagnostics.createdPOs}`
+      );
     }
 
     function renderKpis() {
@@ -1315,6 +1430,7 @@
       el("kpiService").textContent = `${service}%`;
       el("kpiCoverage").textContent = `${coverage} j`;
       el("kpiActivePO").textContent = activePO;
+      el("kpiEligibleAlerts").textContent = poDiagnostics.activeSupplierAlerts;
     }
 
     function renderCharts() {
@@ -1376,7 +1492,7 @@
     function renderSummary() {
       const alerts = articles.filter(a => a.BNMP_message === "À commander");
       const classAAlerts = alerts.filter(a => a.ABC_class === "A").length;
-      const inactiveSuppliers = suppliers.filter(s => s.statut === "inactif").length;
+      const inactiveSuppliers = suppliers.filter(s => normalizeStatus(s.statut) === "inactif").length;
       const blockedPO = purchaseOrders.filter(po => po.requires_special_validation).length;
 
       el("summaryBox").innerHTML = `
@@ -1390,14 +1506,28 @@
       `;
     }
 
+    function renderPODiagnostic() {
+      el("poDiagnosticBox").innerHTML = `
+        <strong>Diagnostic automatique sur le fichier Excel :</strong><br><br>
+        - Articles en alerte BNMP : <strong>${poDiagnostics.totalAlerts}</strong><br>
+        - Alertes avec fournisseur actif : <strong>${poDiagnostics.activeSupplierAlerts}</strong><br>
+        - Alertes avec fournisseur inactif : <strong>${poDiagnostics.inactiveSupplierAlerts}</strong><br>
+        - PO réellement créés : <strong>${poDiagnostics.createdPOs}</strong><br>
+        - PO bloqués par garde-fou (EOQ × 2) : <strong>${poDiagnostics.blockedByGuard}</strong><br>
+        - Articles avec statut fournisseur actif détecté : <strong>${poDiagnostics.activeStatusCount}</strong><br>
+        - Articles avec statut fournisseur inactif détecté : <strong>${poDiagnostics.inactiveStatusCount}</strong><br><br>
+        <strong>Contrôle :</strong> cette zone permet de vérifier immédiatement si le moteur PO travaille bien sur les données réelles du fichier Excel.
+      `;
+    }
+
     function renderPODraftCards() {
       const drafts = purchaseOrders.filter(po => po.statut === "Brouillon" || po.statut === "À valider");
       if (!drafts.length) {
-        el("poDraftCards").innerHTML = `<div class="note-box">Aucun PO actif.</div>`;
+        el("poDraftCards").innerHTML = `<div class="note-box">Aucun PO actif détecté pour le moment.</div>`;
         return;
       }
 
-      el("poDraftCards").innerHTML = drafts.map(po => `
+      el("poDraftCards").innerHTML = drafts.slice(0, 12).map(po => `
         <div class="mini-card">
           <h4>${po.po_id}</h4>
           <div class="meta">
@@ -1487,13 +1617,14 @@
     function renderSuppliersTable() {
       el("suppliersTableBody").innerHTML = suppliers.map(s => {
         const linked = articles.filter(a => a.supplier_id === s.supplier_id).length;
-        const statusClass = s.statut === "actif" ? "status-ok" : "status-inactive";
+        const normalized = normalizeStatus(s.statut);
+        const statusClass = normalized === "actif" ? "status-ok" : "status-inactive";
         return `
           <tr>
             <td><strong>${s.supplier_id}</strong></td>
             <td>${s.nom}</td>
             <td>${s.delai_moyen_jours} j</td>
-            <td><span class="status-pill ${statusClass}">${s.statut}</span></td>
+            <td><span class="status-pill ${statusClass}">${normalized}</span></td>
             <td>${s.taux_conformite}%</td>
             <td>${linked}</td>
             <td>
@@ -1562,7 +1693,7 @@
 
       const cases = [
         { title: "Cas 1", desc: "Création automatique d’un PO pour article en alerte BNMP avec fournisseur actif", pass: case1 },
-        { title: "Cas 2", desc: "Un seul PO brouillon / validation par SKU tant qu’il n’est pas clos", pass: case2 },
+        { title: "Cas 2", desc: "Un seul PO ouvert par SKU tant qu’il n’est pas clos", pass: case2 },
         { title: "Cas 3", desc: "Journalisation automatique des événements critiques", pass: case3 },
         { title: "Cas 4", desc: "Blocage logique si fournisseur inactif", pass: case4 },
         { title: "Cas 5", desc: "Workflow PO respecte les statuts autorisés", pass: case5 }
@@ -1584,6 +1715,7 @@
       renderKpis();
       renderCharts();
       renderSummary();
+      renderPODiagnostic();
       renderPODraftCards();
       renderArticlesTable();
       renderABCTable();
@@ -1667,7 +1799,7 @@
       el("fCategory").value = a.category;
       el("fUom").value = a.uom;
       el("fSupplierId").value = a.supplier_id;
-      el("fSupplierStatus").value = a.supplier_status;
+      el("fSupplierStatus").value = normalizeStatus(a.supplier_status);
       el("fLeadTime").value = a.lead_time_days;
       el("fUnitCost").value = a.unit_cost;
       el("fAnnualDemand").value = a.annual_demand_D;
@@ -1769,7 +1901,7 @@
       el("sId").value = s.supplier_id;
       el("sName").value = s.nom;
       el("sLead").value = s.delai_moyen_jours;
-      el("sStatus").value = s.statut;
+      el("sStatus").value = normalizeStatus(s.statut);
       el("sConformity").value = s.taux_conformite;
 
       el("supplierFormNote").textContent = `Mode modification activé pour ${s.supplier_id}.`;
@@ -1803,7 +1935,7 @@
           return {
             ...a,
             supplier_id: s.supplier_id,
-            supplier_status: s.statut,
+            supplier_status: normalizeStatus(s.statut),
             lead_time_days: s.delai_moyen_jours
           };
         }
