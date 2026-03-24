@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📊 ENTREPÔT PowerVACA-V3.2 PRO</title>
+  <title>📊 ENTREPÔT PowerVACA-V3.3 FINAL</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -22,6 +22,7 @@
       --warning:#f39c12;
       --nav:#2c3e50;
       --dark:#34495e;
+      --purple:#6f42c1;
       --shadow:0 8px 24px rgba(31,45,61,.10);
       --radius:16px;
     }
@@ -175,6 +176,11 @@
       gap:16px;
     }
 
+    .stack{
+      display:grid;
+      gap:18px;
+    }
+
     .kpi{
       color:#fff;
       border-radius:18px;
@@ -201,7 +207,7 @@
     .kpi.green{background:linear-gradient(135deg,#45d786,#2fbf71)}
     .kpi.orange{background:linear-gradient(135deg,#f6b64e,#f39c12)}
     .kpi.dark{background:linear-gradient(135deg,#516273,#34495e)}
-    .kpi.purple{background:linear-gradient(135deg,#8e63d2,#6f42c1)}
+    .kpi.purple{background:linear-gradient(135deg,#9060db,#6f42c1)}
 
     .kpi .label{
       font-size:1rem;
@@ -499,6 +505,15 @@
       text-align:left;
     }
 
+    .highlight{
+      background:#f6fbff;
+      border-left:5px solid var(--primary);
+      padding:12px 14px;
+      border-radius:12px;
+      color:#35526b;
+      line-height:1.6;
+    }
+
     @media (max-width: 1300px){
       .grid-6,.grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes,.as-is-grid{
         grid-template-columns:1fr 1fr;
@@ -520,11 +535,11 @@
       <div class="title-wrap">
         <div class="logo">📊</div>
         <div>
-          <h1>📊 ENTREPÔT PowerVACA-V3.2 PRO</h1>
+          <h1>📊 ENTREPÔT PowerVACA-V3.3 FINAL</h1>
           <div class="subtitle">SIAG final — BNMP, KPI, TRS, ABC, EOQ, Fournisseurs, PO, Automatisation, Audit, UAT et UML AS-IS / TO-BE</div>
         </div>
       </div>
-      <div class="version-badge">Version officielle : V3.2 PRO</div>
+      <div class="version-badge">Version officielle : V3.3 FINAL</div>
     </div>
   </header>
 
@@ -791,6 +806,11 @@
       </div>
 
       <div class="card">
+        <h3 class="section-title">Synthèse fournisseurs</h3>
+        <div class="highlight" id="supplierSummaryBox">Aucune donnée fournisseur.</div>
+      </div>
+
+      <div class="card">
         <h3 class="section-title">Table fournisseurs</h3>
         <div class="table-wrap">
           <table>
@@ -812,6 +832,40 @@
     </section>
 
     <section id="po" class="tab">
+      <div class="card">
+        <h3 class="section-title">Résumé workflow PO</h3>
+        <div class="grid-4">
+          <div class="small-box"><div class="big" id="poSummaryTotal">0</div><div class="cap">PO totaux</div></div>
+          <div class="small-box"><div class="big" id="poSummaryDraft">0</div><div class="cap">Brouillon</div></div>
+          <div class="small-box"><div class="big" id="poSummaryValidate">0</div><div class="cap">À valider</div></div>
+          <div class="small-box"><div class="big" id="poSummaryOpen">0</div><div class="cap">PO ouverts</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Table réelle des bons de commande</h3>
+        <div class="subtle">Cette table sert directement de capture pour la remise finale : PO ID, SKU, quantité, fournisseur et statut.</div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>PO ID</th>
+                <th>SKU</th>
+                <th>Qty</th>
+                <th>Supplier</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Classe</th>
+                <th>EOQ</th>
+                <th>Contrôle</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="poTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <h3 class="section-title">Table des règles métier</h3>
         <div class="table-wrap">
@@ -859,40 +913,19 @@
           </table>
         </div>
       </div>
-
-      <div class="card">
-        <h3 class="section-title">Workflow des bons de commande</h3>
-        <div class="subtle">Statuts disponibles : Brouillon → À valider → Envoyé → Reçu → Clos</div>
-      </div>
-
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>PO ID</th>
-                <th>SKU</th>
-                <th>Qty</th>
-                <th>Supplier</th>
-                <th>Date</th>
-                <th>Statut</th>
-                <th>Classe</th>
-                <th>EOQ</th>
-                <th>Contrôle</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="poTableBody"></tbody>
-          </table>
-        </div>
-      </div>
     </section>
 
     <section id="audit" class="tab">
-      <div class="grid-2">
+      <div class="stack">
+        <div class="card">
+          <h3 class="section-title">Scénario test UAT — 5 cas complets</h3>
+          <div class="uat-grid" id="uatCards"></div>
+        </div>
+
         <div class="card">
           <h3 class="section-title">Journal d’audit</h3>
-          <div class="table-wrap">
+          <div class="subtle">Cette section est organisée en pleine largeur pour faciliter la capture finale des événements clés.</div>
+          <div class="table-wrap" style="margin-top:12px;">
             <table>
               <thead>
                 <tr>
@@ -905,11 +938,6 @@
               <tbody id="auditTableBody"></tbody>
             </table>
           </div>
-        </div>
-
-        <div class="card">
-          <h3 class="section-title">Scénario test UAT — 5 cas</h3>
-          <div class="uat-grid" id="uatCards"></div>
         </div>
       </div>
     </section>
@@ -1086,7 +1114,7 @@
         utilisateur: currentUser,
         details
       });
-      if (auditLogs.length > 500) auditLogs = auditLogs.slice(0, 500);
+      if (auditLogs.length > 700) auditLogs = auditLogs.slice(0, 700);
     }
 
     function sanitizeArticle(raw) {
@@ -1216,6 +1244,7 @@
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
 
         articles = enrichArticles(rows);
+        suppliers = [];
         syncSuppliersFromArticles();
         rebuildAutomationFromScratch();
         renderAll();
@@ -1253,6 +1282,7 @@
           const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
 
           articles = enrichArticles(rows);
+          suppliers = [];
           syncSuppliersFromArticles();
           rebuildAutomationFromScratch();
           renderAll();
@@ -1268,8 +1298,10 @@
 
     function syncSuppliersFromArticles() {
       const map = new Map(suppliers.map(s => [s.supplier_id, sanitizeSupplier(s)]));
+
       articles.forEach(a => {
         if (!a.supplier_id) return;
+
         if (!map.has(a.supplier_id)) {
           map.set(a.supplier_id, sanitizeSupplier({
             supplier_id: a.supplier_id,
@@ -1285,6 +1317,7 @@
           if (!existing.delai_moyen_jours) existing.delai_moyen_jours = a.lead_time_days || 0;
         }
       });
+
       suppliers = [...map.values()];
     }
 
@@ -1516,7 +1549,7 @@
         - PO bloqués par garde-fou (EOQ × 2) : <strong>${poDiagnostics.blockedByGuard}</strong><br>
         - Articles avec statut fournisseur actif détecté : <strong>${poDiagnostics.activeStatusCount}</strong><br>
         - Articles avec statut fournisseur inactif détecté : <strong>${poDiagnostics.inactiveStatusCount}</strong><br><br>
-        <strong>Contrôle :</strong> cette zone permet de vérifier immédiatement si le moteur PO travaille bien sur les données réelles du fichier Excel.
+        <strong>Contrôle :</strong> cette zone permet de vérifier immédiatement que le moteur PO travaille bien sur les données réelles du fichier Excel.
       `;
     }
 
@@ -1614,9 +1647,37 @@
       }).join("");
     }
 
+    function renderSupplierSummary() {
+      const enriched = suppliers.map(s => ({
+        ...s,
+        linked: articles.filter(a => a.supplier_id === s.supplier_id).length
+      }));
+
+      const totalSuppliers = enriched.length;
+      const suppliersWithLinks = enriched.filter(s => s.linked > 0).length;
+      const topSupplier = [...enriched].sort((a,b) => b.linked - a.linked)[0];
+
+      el("supplierSummaryBox").innerHTML = `
+        - Fournisseurs totaux : <strong>${totalSuppliers}</strong><br>
+        - Fournisseurs avec au moins 1 SKU lié : <strong>${suppliersWithLinks}</strong><br>
+        - Fournisseur le plus lié : <strong>${topSupplier ? topSupplier.supplier_id : "-"}</strong>
+          ${topSupplier ? `(${topSupplier.linked} SKU)` : ""}
+      `;
+    }
+
     function renderSuppliersTable() {
-      el("suppliersTableBody").innerHTML = suppliers.map(s => {
+      const supplierRows = suppliers.map(s => {
         const linked = articles.filter(a => a.supplier_id === s.supplier_id).length;
+        return { ...s, linked };
+      }).sort((a, b) => {
+        if (b.linked !== a.linked) return b.linked - a.linked;
+        if (normalizeStatus(a.statut) !== normalizeStatus(b.statut)) {
+          return normalizeStatus(a.statut) === "actif" ? -1 : 1;
+        }
+        return a.supplier_id.localeCompare(b.supplier_id);
+      });
+
+      el("suppliersTableBody").innerHTML = supplierRows.map(s => {
         const normalized = normalizeStatus(s.statut);
         const statusClass = normalized === "actif" ? "status-ok" : "status-inactive";
         return `
@@ -1626,7 +1687,7 @@
             <td>${s.delai_moyen_jours} j</td>
             <td><span class="status-pill ${statusClass}">${normalized}</span></td>
             <td>${s.taux_conformite}%</td>
-            <td>${linked}</td>
+            <td><strong>${s.linked}</strong></td>
             <td>
               <div class="actions">
                 <button class="btn btn-warning" onclick="editSupplier('${s.supplier_id.replace(/'/g, "\\'")}')">Modifier</button>
@@ -1636,10 +1697,17 @@
           </tr>
         `;
       }).join("") || `<tr><td colspan="7" class="subtle">Aucun fournisseur.</td></tr>`;
+
+      renderSupplierSummary();
     }
 
     function renderPOTable() {
-      el("poTableBody").innerHTML = purchaseOrders.map(po => {
+      const sortedPO = [...purchaseOrders].sort((a, b) => {
+        const order = { "Brouillon": 1, "À valider": 2, "Envoyé": 3, "Reçu": 4, "Clos": 5 };
+        return order[a.statut] - order[b.statut];
+      });
+
+      el("poTableBody").innerHTML = sortedPO.map(po => {
         let statusClass = "status-draft";
         if (po.statut === "Envoyé" || po.statut === "Reçu") statusClass = "status-sent";
         if (po.statut === "Clos") statusClass = "status-closed";
@@ -1665,6 +1733,11 @@
           </tr>
         `;
       }).join("") || `<tr><td colspan="10" class="subtle">Aucun PO.</td></tr>`;
+
+      el("poSummaryTotal").textContent = purchaseOrders.length;
+      el("poSummaryDraft").textContent = purchaseOrders.filter(po => po.statut === "Brouillon").length;
+      el("poSummaryValidate").textContent = purchaseOrders.filter(po => po.statut === "À valider").length;
+      el("poSummaryOpen").textContent = purchaseOrders.filter(po => ["Brouillon","À valider","Envoyé","Reçu"].includes(po.statut)).length;
     }
 
     function renderAuditTable() {
