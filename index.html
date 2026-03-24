@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ENTREPÔT PowerVACA-V2.1 PRO</title>
+  <title>ENTREPÔT PowerVACA-V3.0</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
@@ -21,6 +21,7 @@
       --danger:#e74c3c;
       --warning:#f39c12;
       --nav:#2c3e50;
+      --dark:#34495e;
       --shadow:0 8px 24px rgba(31,45,61,.10);
       --radius:16px;
     }
@@ -28,7 +29,7 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: "Segoe UI", Arial, sans-serif;
+      font-family:"Segoe UI", Arial, sans-serif;
       color:var(--text);
       background:linear-gradient(180deg,#f5f8fc 0%, #edf2f7 100%);
     }
@@ -36,16 +37,16 @@
     header{
       background:linear-gradient(90deg,var(--primary-dark),#3b9ae1);
       color:#fff;
-      padding:26px 18px;
+      padding:24px 18px;
       box-shadow:var(--shadow);
     }
 
     .header-wrap{
-      max-width:1400px;
+      max-width:1500px;
       margin:0 auto;
       display:flex;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       gap:16px;
       flex-wrap:wrap;
     }
@@ -57,11 +58,10 @@
     }
 
     .logo{
-      width:52px;
-      height:52px;
+      width:54px;
+      height:54px;
       border-radius:12px;
       background:#fff;
-      color:var(--primary-dark);
       display:grid;
       place-items:center;
       font-size:28px;
@@ -70,9 +70,14 @@
 
     h1{
       margin:0;
-      font-size:2.1rem;
+      font-size:2rem;
       font-weight:800;
-      letter-spacing:.2px;
+    }
+
+    .subtitle{
+      color:rgba(255,255,255,.88);
+      margin-top:6px;
+      font-size:.98rem;
     }
 
     .version-badge{
@@ -81,39 +86,37 @@
       padding:10px 14px;
       border-radius:999px;
       font-weight:700;
-      backdrop-filter: blur(6px);
     }
 
     nav{
       background:var(--nav);
       display:flex;
-      gap:0;
       flex-wrap:wrap;
       box-shadow:0 4px 10px rgba(0,0,0,.08);
     }
 
     nav button{
-      flex:1 1 180px;
-      padding:16px 14px;
+      flex:1 1 160px;
+      padding:15px 12px;
       border:none;
       background:transparent;
       color:#fff;
       cursor:pointer;
       font-size:1rem;
-      font-weight:600;
-      transition:.22s ease;
+      font-weight:700;
       border-bottom:3px solid transparent;
+      transition:.2s ease;
     }
 
     nav button:hover,
     nav button.active{
       background:#34495e;
-      border-bottom-color:#61b3f1;
+      border-bottom-color:#6fc1ff;
     }
 
     .app{
-      max-width:1400px;
-      margin:22px auto;
+      max-width:1500px;
+      margin:20px auto;
       padding:0 16px 28px;
     }
 
@@ -139,6 +142,13 @@
     .subtle{
       color:var(--muted);
       font-size:.95rem;
+      line-height:1.5;
+    }
+
+    .grid-5{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:16px;
     }
 
     .grid-4{
@@ -163,7 +173,7 @@
       color:#fff;
       border-radius:18px;
       padding:22px 20px;
-      min-height:132px;
+      min-height:128px;
       box-shadow:var(--shadow);
       position:relative;
       overflow:hidden;
@@ -184,24 +194,23 @@
     .kpi.red{background:linear-gradient(135deg,#ef6254,#e74c3c)}
     .kpi.green{background:linear-gradient(135deg,#45d786,#2fbf71)}
     .kpi.orange{background:linear-gradient(135deg,#f6b64e,#f39c12)}
+    .kpi.dark{background:linear-gradient(135deg,#516273,#34495e)}
 
     .kpi .label{
       font-size:1rem;
-      opacity:.95;
+      font-weight:700;
       margin-bottom:12px;
-      font-weight:600;
     }
 
     .kpi .value{
-      font-size:2rem;
-      font-weight:800;
-      letter-spacing:.3px;
+      font-size:1.95rem;
+      font-weight:900;
     }
 
     .kpi .note{
       margin-top:10px;
-      opacity:.92;
-      font-size:.92rem;
+      font-size:.9rem;
+      opacity:.95;
     }
 
     .toolbar{
@@ -262,28 +271,20 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-width:120px;
-      padding:8px 12px;
+      min-width:118px;
+      padding:7px 12px;
       border-radius:999px;
-      font-size:.88rem;
+      font-size:.85rem;
       font-weight:800;
       letter-spacing:.2px;
     }
 
-    .status-ok{
-      background:rgba(47,191,113,.12);
-      color:#1f8a51;
-    }
-
-    .status-alert{
-      background:rgba(231,76,60,.12);
-      color:#c0392b;
-    }
-
-    .status-draft{
-      background:rgba(243,156,18,.15);
-      color:#a86b07;
-    }
+    .status-ok{background:rgba(47,191,113,.12); color:#1f8a51}
+    .status-alert{background:rgba(231,76,60,.12); color:#c0392b}
+    .status-draft{background:rgba(243,156,18,.15); color:#a86b07}
+    .status-sent{background:rgba(47,128,192,.14); color:#1e689b}
+    .status-closed{background:rgba(52,73,94,.14); color:#2d3e50}
+    .status-inactive{background:rgba(149,165,166,.18); color:#55636c}
 
     .table-wrap{
       overflow:auto;
@@ -294,16 +295,16 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1200px;
+      min-width:1100px;
       background:#fff;
     }
 
     th,td{
-      padding:12px 10px;
+      padding:11px 10px;
       border-bottom:1px solid #edf2f7;
       text-align:center;
       vertical-align:middle;
-      font-size:.95rem;
+      font-size:.94rem;
     }
 
     th{
@@ -315,14 +316,7 @@
       z-index:1;
     }
 
-    tr:hover td{
-      background:#fbfdff;
-    }
-
-    .mini{
-      font-size:.85rem;
-      color:var(--muted);
-    }
+    tr:hover td{background:#fbfdff}
 
     .actions{
       display:flex;
@@ -336,66 +330,78 @@
       border-radius:16px;
       padding:14px;
       border:1px solid var(--line);
-      min-height:360px;
+      min-height:350px;
     }
 
     .chart-box canvas{
       width:100% !important;
-      height:320px !important;
+      height:310px !important;
     }
 
-    .split{
+    .po-grid,
+    .supplier-grid,
+    .audit-grid,
+    .uat-grid{
       display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:16px;
-    }
-
-    .po-list{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
       gap:14px;
     }
 
-    .po-card{
+    .mini-card{
       border:1px solid var(--line);
-      border-left:6px solid var(--warning);
       border-radius:16px;
       padding:16px;
-      background:#fffef9;
+      background:#fff;
       box-shadow:var(--shadow);
     }
 
-    .po-card h4{
+    .mini-card h4{
       margin:0 0 10px;
-      color:#6b4a00;
-      font-size:1.04rem;
+      color:#203447;
+      font-size:1.02rem;
     }
 
-    .po-card .meta{
+    .mini-card .meta{
       display:grid;
       gap:6px;
       font-size:.94rem;
       color:#334e68;
     }
 
-    .legend-note{
-      background:#f9fbfd;
-      border:1px dashed var(--line);
+    .note-box{
+      background:#f8fbfd;
+      border:1px solid var(--line);
       border-radius:14px;
-      padding:12px;
-      color:#546e7a;
+      padding:14px;
+      color:#51697e;
+      line-height:1.55;
     }
 
-    .uml-wrap{
+    .small-kpi{
       display:grid;
-      grid-template-columns:1fr;
-      gap:18px;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
     }
 
-    .uml-title{
-      margin:0 0 12px;
-      font-size:1.15rem;
+    .small-box{
+      background:#f8fbfd;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      text-align:center;
+    }
+
+    .small-box .big{
+      font-size:1.45rem;
       font-weight:800;
+      color:#203447;
+    }
+
+    .small-box .cap{
+      color:#63788a;
+      margin-top:6px;
+      font-size:.92rem;
+      font-weight:600;
     }
 
     .swimlanes{
@@ -410,7 +416,6 @@
       border-radius:18px;
       padding:14px;
       min-height:420px;
-      position:relative;
     }
 
     .lane h4{
@@ -419,7 +424,6 @@
       color:#294961;
       font-size:1rem;
       font-weight:800;
-      letter-spacing:.3px;
     }
 
     .uml-node{
@@ -435,43 +439,24 @@
       box-shadow:0 4px 10px rgba(42,72,97,.08);
     }
 
-    .uml-node.green{
-      background:#dff5e8;
-      border-color:#aaddbf;
-    }
-
-    .uml-node.red{
-      background:#fde6e3;
-      border-color:#f1b8b0;
-    }
-
-    .uml-node.orange{
-      background:#fceccf;
-      border-color:#f2cf7b;
-    }
+    .uml-node.green{background:#dff5e8;border-color:#aaddbf}
+    .uml-node.red{background:#fde6e3;border-color:#f1b8b0}
+    .uml-node.orange{background:#fceccf;border-color:#f2cf7b}
 
     .uml-arrow{
       text-align:center;
-      font-size:1.25rem;
+      font-size:1.2rem;
       color:#607d8b;
       font-weight:900;
       margin:6px 0;
     }
 
-    .uml-start,
-    .uml-end{
-      width:22px;
-      height:22px;
-      border-radius:50%;
-      margin:10px auto;
-      background:#1f2937;
+    .uml-start,.uml-end{
+      width:22px;height:22px;border-radius:50%;margin:10px auto;background:#1f2937;
       box-shadow:0 0 0 4px rgba(31,41,55,.08);
     }
 
-    .uml-end{
-      position:relative;
-    }
-
+    .uml-end{position:relative}
     .uml-end::after{
       content:"";
       position:absolute;
@@ -481,15 +466,8 @@
     }
 
     .decision{
-      width:118px;
-      height:118px;
-      margin:14px auto;
-      background:#f6d28b;
-      border:1px solid #d9aa47;
-      transform:rotate(45deg);
-      display:grid;
-      place-items:center;
-      box-shadow:0 8px 16px rgba(0,0,0,.08);
+      width:118px;height:118px;margin:14px auto;background:#f6d28b;border:1px solid #d9aa47;
+      transform:rotate(45deg);display:grid;place-items:center;box-shadow:0 8px 16px rgba(0,0,0,.08);
     }
 
     .decision span{
@@ -502,75 +480,22 @@
       line-height:1.2;
     }
 
-    .as-is-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
+    .rule-table td, .rule-table th{
+      text-align:left;
     }
 
-    .as-lane{
-      background:#fafcfe;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px;
-      min-height:320px;
-    }
-
-    .note-box{
-      background:#f8fbfd;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      color:#51697e;
-      line-height:1.55;
-    }
-
-    .footer-note{
-      margin-top:8px;
-      color:#607286;
-      font-size:.92rem;
-    }
-
-    .small-kpi{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
-
-    .small-box{
-      background:#f8fbfd;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      text-align:center;
-    }
-
-    .small-box .big{
-      font-size:1.5rem;
-      font-weight:800;
-      color:#203447;
-    }
-
-    .small-box .cap{
-      color:#63788a;
-      margin-top:6px;
-      font-size:.92rem;
-      font-weight:600;
-    }
-
-    @media (max-width: 1200px){
-      .grid-4,.grid-3,.grid-2,.split,.swimlanes,.as-is-grid,.small-kpi{
+    @media (max-width: 1300px){
+      .grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes{
         grid-template-columns:1fr 1fr;
       }
     }
 
-    @media (max-width: 820px){
-      .grid-4,.grid-3,.grid-2,.split,.swimlanes,.as-is-grid,.small-kpi{
+    @media (max-width: 860px){
+      .grid-5,.grid-4,.grid-3,.grid-2,.small-kpi,.swimlanes{
         grid-template-columns:1fr;
       }
-      h1{font-size:1.55rem}
-      .kpi .value{font-size:1.6rem}
-      .lane,.as-lane{min-height:auto}
+      h1{font-size:1.5rem}
+      .kpi .value{font-size:1.55rem}
     }
   </style>
 </head>
@@ -578,13 +503,13 @@
   <header>
     <div class="header-wrap">
       <div class="title-wrap">
-        <div class="logo">📊</div>
+        <div class="logo">📦</div>
         <div>
-          <h1>ENTREPÔT PowerVACA-V2.1 PRO</h1>
-          <div class="footer-note">Application web SIAG — BNMP, KPI, TRS, ABC, EOQ, Import Excel et UML visuel</div>
+          <h1>ENTREPÔT PowerVACA-V3 EXPERT</h1>
+          <div class="subtitle">SIAG final — BNMP, KPI, TRS, ABC, EOQ, Fournisseurs, PO, Automatisation, Audit et UAT</div>
         </div>
       </div>
-      <div class="version-badge">Version officielle : V2.1 PRO</div>
+      <div class="version-badge">Version officielle : V3 EXPERT</div>
     </div>
   </header>
 
@@ -593,35 +518,39 @@
     <button class="tab-btn" data-tab="articles">Articles & Import</button>
     <button class="tab-btn" data-tab="trs">TRS</button>
     <button class="tab-btn" data-tab="abc">ABC / EOQ</button>
+    <button class="tab-btn" data-tab="suppliers">Fournisseurs</button>
+    <button class="tab-btn" data-tab="po">Workflow PO</button>
+    <button class="tab-btn" data-tab="audit">Audit & UAT</button>
     <button class="tab-btn" data-tab="process">Processus UML</button>
   </nav>
 
   <main class="app">
-    <!-- DASHBOARD -->
     <section id="dashboard" class="tab active">
-      <div class="grid-4">
+      <div class="grid-5">
         <div class="kpi blue">
           <div class="label">Total SKU</div>
           <div class="value" id="kpiTotalSku">0</div>
-          <div class="note">Nombre total d’articles chargés</div>
+          <div class="note">Nombre total d’articles</div>
         </div>
-
         <div class="kpi red">
           <div class="label">Ruptures</div>
           <div class="value" id="kpiRuptures">0</div>
-          <div class="note">Articles avec Net disponible &lt; 0</div>
+          <div class="note">Net disponible &lt; 0</div>
         </div>
-
         <div class="kpi green">
           <div class="label">Taux de service</div>
           <div class="value" id="kpiService">0%</div>
-          <div class="note">% de SKU avec Net ≥ seuil minimum</div>
+          <div class="note">% SKU avec Net ≥ seuil minimum</div>
         </div>
-
         <div class="kpi orange">
           <div class="label">Couverture moyenne</div>
           <div class="value" id="kpiCoverage">0 j</div>
           <div class="note">Net / consommation journalière</div>
+        </div>
+        <div class="kpi dark">
+          <div class="label">PO actifs</div>
+          <div class="value" id="kpiActivePO">0</div>
+          <div class="note">Brouillon, À valider, Envoyé ou Reçu</div>
         </div>
       </div>
 
@@ -635,30 +564,23 @@
           <canvas id="abcChart"></canvas>
         </div>
         <div class="chart-box">
-          <h3 class="section-title">Top catégories</h3>
-          <canvas id="categoryChart"></canvas>
+          <h3 class="section-title">Statut des PO</h3>
+          <canvas id="poChart"></canvas>
         </div>
       </div>
 
-      <div class="split" style="margin-top:16px;">
+      <div class="grid-2" style="margin-top:16px;">
         <div class="card">
-          <h3 class="section-title">Messages automatiques / PO Draft</h3>
-          <div class="subtle" style="margin-bottom:12px;">
-            Générés quand <strong>Net &lt; seuil_min</strong> selon la logique BNMP.
-          </div>
-          <div id="poDraftList" class="po-list"></div>
+          <h3 class="section-title">PO Draft générés automatiquement</h3>
+          <div id="poDraftCards" class="po-grid"></div>
         </div>
-
         <div class="card">
-          <h3 class="section-title">Synthèse décisionnelle</h3>
-          <div class="legend-note" id="summaryBox">
-            Aucun jeu de données chargé pour le moment.
-          </div>
+          <h3 class="section-title">Résumé décisionnel</h3>
+          <div class="note-box" id="summaryBox">Aucune donnée chargée.</div>
         </div>
       </div>
     </section>
 
-    <!-- ARTICLES & IMPORT -->
     <section id="articles" class="tab">
       <div class="card">
         <h3 class="section-title">Import du fichier Excel</h3>
@@ -669,10 +591,10 @@
           </div>
           <button class="btn btn-primary" id="btnImportExcel">Importer Excel</button>
           <button class="btn btn-dark" id="btnLoadDefault">Charger le fichier du repo</button>
-          <button class="btn btn-light" id="btnResetSamples">Charger un mini échantillon</button>
+          <button class="btn btn-light" id="btnLoadSamples">Charger un mini échantillon</button>
         </div>
-        <div class="footer-note" id="importStatus">
-          Astuce GitHub : place <strong>warehouseops_dataset_350.xlsx</strong> dans le même dossier que <strong>index.html</strong>.
+        <div class="subtle" id="importStatus">
+          Place <strong>warehouseops_dataset_350.xlsx</strong> au même niveau que <strong>index.html</strong>.
         </div>
       </div>
 
@@ -683,7 +605,6 @@
           <div class="field"><label>Description</label><input id="fDescription" /></div>
           <div class="field"><label>Catégorie</label><input id="fCategory" /></div>
           <div class="field"><label>UOM</label><input id="fUom" value="UN" /></div>
-
           <div class="field"><label>Supplier ID</label><input id="fSupplierId" /></div>
           <div class="field"><label>Supplier Status</label>
             <select id="fSupplierStatus">
@@ -693,36 +614,33 @@
           </div>
           <div class="field"><label>Lead time (jours)</label><input id="fLeadTime" type="number" min="0" value="0" /></div>
           <div class="field"><label>Coût unitaire</label><input id="fUnitCost" type="number" step="0.01" min="0" value="0" /></div>
-
           <div class="field"><label>Demande annuelle D</label><input id="fAnnualDemand" type="number" min="0" value="0" /></div>
           <div class="field"><label>Consommation journalière</label><input id="fDailyConsumption" type="number" step="0.01" min="0" value="0" /></div>
           <div class="field"><label>Coût commande S</label><input id="fOrderCost" type="number" step="0.01" min="0" value="0" /></div>
           <div class="field"><label>Coût possession H</label><input id="fHoldingCost" type="number" step="0.01" min="0" value="0" /></div>
-
           <div class="field"><label>Safety stock</label><input id="fSafetyStock" type="number" min="0" value="0" /></div>
           <div class="field"><label>Reorder point</label><input id="fReorderPoint" type="number" min="0" value="0" /></div>
           <div class="field"><label>Seuil minimum</label><input id="fSeuilMin" type="number" min="0" value="0" /></div>
           <div class="field"><label>Stock physique</label><input id="fStockPhysical" type="number" min="0" value="0" /></div>
-
           <div class="field"><label>En transit</label><input id="fInTransit" type="number" min="0" value="0" /></div>
           <div class="field"><label>Réservé</label><input id="fReserved" type="number" min="0" value="0" /></div>
           <div class="field"><label>Indice variabilité</label><input id="fVariability" type="number" step="0.01" min="0" value="0" /></div>
-          <div class="field"><label>Classe XYZ (option)</label><input id="fXyzClass" value="X" /></div>
+          <div class="field"><label>Classe XYZ</label><input id="fXyzClass" value="X" /></div>
         </div>
 
         <div class="toolbar" style="margin-top:14px;">
           <button class="btn btn-success" id="btnSaveArticle">Enregistrer</button>
           <button class="btn btn-warning" id="btnUpdateArticle">Mettre à jour</button>
-          <button class="btn btn-light" id="btnClearForm">Vider le formulaire</button>
+          <button class="btn btn-light" id="btnClearArticle">Vider le formulaire</button>
         </div>
-        <div class="footer-note" id="formNote">Mode ajout activé.</div>
+        <div class="subtle" id="formNote">Mode ajout activé.</div>
       </div>
 
       <div class="card">
         <div class="toolbar">
-          <div class="field" style="max-width:320px;">
+          <div class="field" style="max-width:300px;">
             <label>Recherche article</label>
-            <input id="searchInput" placeholder="SKU / description / catégorie" />
+            <input id="searchArticle" placeholder="SKU / description / catégorie" />
           </div>
         </div>
       </div>
@@ -736,18 +654,17 @@
                 <th>SKU</th>
                 <th>Description</th>
                 <th>Catégorie</th>
+                <th>Supplier</th>
                 <th>Stock</th>
                 <th>Transit</th>
                 <th>Réservé</th>
                 <th>Net</th>
                 <th>Seuil</th>
                 <th>BNMP</th>
-                <th>Daily Cons.</th>
                 <th>Coverage</th>
-                <th>Valeur annuelle</th>
                 <th>ABC</th>
                 <th>EOQ</th>
-                <th>PO Draft</th>
+                <th>PO auto</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -757,72 +674,46 @@
       </div>
     </section>
 
-    <!-- TRS -->
     <section id="trs" class="tab">
       <div class="grid-2">
         <div class="card">
           <h3 class="section-title">Calcul TRS — préparation de commandes</h3>
-
           <div class="toolbar">
-            <div class="field"><label>Temps planifié</label><input id="trsPlan" type="number" min="1" value="480" /></div>
-            <div class="field"><label>Arrêts</label><input id="trsStops" type="number" min="0" value="40" /></div>
-            <div class="field"><label>Cadence théorique / h</label><input id="trsRate" type="number" min="1" value="55" /></div>
-            <div class="field"><label>Quantité totale</label><input id="trsTotalQty" type="number" min="1" value="350" /></div>
-            <div class="field"><label>Quantité mauvaise</label><input id="trsBadQty" type="number" min="0" value="15" /></div>
+            <div class="field"><label>Temps planifié (min)</label><input id="trsPlan" type="number" min="1" value="480"></div>
+            <div class="field"><label>Arrêts (min)</label><input id="trsStops" type="number" min="0" value="40"></div>
+            <div class="field"><label>Cadence théorique / h</label><input id="trsRate" type="number" min="1" value="55"></div>
+            <div class="field"><label>Quantité totale</label><input id="trsTotalQty" type="number" min="1" value="350"></div>
+            <div class="field"><label>Quantité mauvaise</label><input id="trsBadQty" type="number" min="0" value="15"></div>
           </div>
-
           <div class="toolbar" style="margin-top:14px;">
             <button class="btn btn-primary" id="btnCalcTRS">Calculer TRS</button>
           </div>
 
           <div class="small-kpi" style="margin-top:16px;">
-            <div class="small-box">
-              <div class="big" id="trsAvailability">0%</div>
-              <div class="cap">Disponibilité</div>
-            </div>
-            <div class="small-box">
-              <div class="big" id="trsPerformance">0%</div>
-              <div class="cap">Performance</div>
-            </div>
-            <div class="small-box">
-              <div class="big" id="trsQuality">0%</div>
-              <div class="cap">Qualité</div>
-            </div>
+            <div class="small-box"><div class="big" id="trsAvailability">0%</div><div class="cap">Disponibilité</div></div>
+            <div class="small-box"><div class="big" id="trsPerformance">0%</div><div class="cap">Performance</div></div>
+            <div class="small-box"><div class="big" id="trsQuality">0%</div><div class="cap">Qualité</div></div>
+            <div class="small-box"><div class="big" id="trsGlobal">0%</div><div class="cap">TRS</div></div>
           </div>
 
-          <div class="small-box" style="margin-top:12px;">
-            <div class="big" id="trsGlobal">0%</div>
-            <div class="cap">TRS global</div>
-          </div>
-
-          <div class="note-box" style="margin-top:14px;" id="trsInterpretation">
-            Saisis les paramètres puis clique sur “Calculer TRS”.
-          </div>
+          <div class="note-box" style="margin-top:14px;" id="trsInterpretation">Saisis les paramètres puis clique sur “Calculer TRS”.</div>
         </div>
 
         <div class="card">
           <h3 class="section-title">Visualisation TRS</h3>
-          <div class="chart-box" style="min-height:420px;">
+          <div class="chart-box">
             <canvas id="trsChart"></canvas>
-          </div>
-          <div class="footer-note">
-            Formules utilisées :
-            Disponibilité = (temps planifié − arrêts) / temps planifié ;
-            Performance = quantité totale / (cadence théorique × temps de fonctionnement en heures) ;
-            Qualité = quantité bonne / quantité totale ;
-            TRS = disponibilité × performance × qualité.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ABC / EOQ -->
     <section id="abc" class="tab">
       <div class="card">
         <h3 class="section-title">Analyse ABC + EOQ</h3>
         <div class="subtle">
           La classe ABC est recalculée à partir de la valeur annuelle = coût unitaire × demande annuelle.
-          L’EOQ est calculé avec la formule de Wilson : √(2DS/H).
+          L’EOQ est calculé avec la formule √(2DS/H).
         </div>
       </div>
 
@@ -851,79 +742,184 @@
       </div>
     </section>
 
-    <!-- PROCESS -->
-    <section id="process" class="tab">
+    <section id="suppliers" class="tab">
       <div class="card">
-        <h3 class="uml-title">AS-IS — Processus actuel (manuel / peu traçable)</h3>
-        <div class="as-is-grid">
-          <div class="as-lane">
-            <h4 style="text-align:center;">Magasinier</h4>
-            <div class="uml-start"></div>
-            <div class="uml-node">Consulter le stock</div>
-            <div class="uml-arrow">↓</div>
-            <div class="uml-node orange">Vérification manuelle</div>
+        <h3 class="section-title">Ajouter / modifier un fournisseur</h3>
+        <div class="toolbar">
+          <div class="field"><label>Supplier ID</label><input id="sId"></div>
+          <div class="field"><label>Nom</label><input id="sName"></div>
+          <div class="field"><label>Délai moyen (jours)</label><input id="sLead" type="number" min="0" value="0"></div>
+          <div class="field"><label>Statut</label>
+            <select id="sStatus">
+              <option value="actif">actif</option>
+              <option value="inactif">inactif</option>
+            </select>
           </div>
+          <div class="field"><label>Taux conformité (%)</label><input id="sConformity" type="number" min="0" max="100" value="95"></div>
+        </div>
+        <div class="toolbar" style="margin-top:14px;">
+          <button class="btn btn-success" id="btnSaveSupplier">Enregistrer</button>
+          <button class="btn btn-warning" id="btnUpdateSupplier">Mettre à jour</button>
+          <button class="btn btn-light" id="btnClearSupplier">Vider</button>
+        </div>
+        <div class="subtle" id="supplierFormNote">Mode ajout fournisseur.</div>
+      </div>
 
-          <div class="as-lane">
-            <h4 style="text-align:center;">Système</h4>
-            <div class="uml-node red">Peu ou pas d’automatisation</div>
-            <div class="uml-arrow">↓</div>
-            <div class="uml-node">Aucun message structuré</div>
-          </div>
+      <div class="card">
+        <h3 class="section-title">Table fournisseurs</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier ID</th>
+                <th>Nom</th>
+                <th>Délai moyen</th>
+                <th>Statut</th>
+                <th>Taux conformité</th>
+                <th>SKU liés</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="suppliersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-          <div class="as-lane">
-            <h4 style="text-align:center;">Acheteur</h4>
-            <div class="uml-node">Décision à l’instinct</div>
-            <div class="uml-arrow">↓</div>
-            <div class="uml-end"></div>
-          </div>
+    <section id="po" class="tab">
+      <div class="card">
+        <h3 class="section-title">Table des règles métier</h3>
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead>
+              <tr>
+                <th>Règle</th>
+                <th>Condition IF</th>
+                <th>Action THEN</th>
+                <th>Garde-fou</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>R1</td>
+                <td>Classe = A AND Net &lt; seuil_min AND supplier actif</td>
+                <td>Créer PO Brouillon + Tâche validation + Log</td>
+                <td>1 seul PO brouillon par SKU</td>
+              </tr>
+              <tr>
+                <td>R2</td>
+                <td>Quantité demandée &gt; EOQ × 2</td>
+                <td>Bloquer validation simple</td>
+                <td>Validation spéciale requise</td>
+              </tr>
+              <tr>
+                <td>R3</td>
+                <td>Supplier inactif</td>
+                <td>Ne pas auto-créer de PO standard</td>
+                <td>Journaliser alerte</td>
+              </tr>
+              <tr>
+                <td>R4</td>
+                <td>PO statut = Reçu</td>
+                <td>Autoriser clôture</td>
+                <td>Historiser l’événement</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       <div class="card">
-        <h3 class="uml-title">TO-BE — Processus cible avec BNMP et workflow intelligent</h3>
+        <h3 class="section-title">Workflow des bons de commande</h3>
+        <div class="subtle">Statuts disponibles : Brouillon → À valider → Envoyé → Reçu → Clos</div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>PO ID</th>
+                <th>SKU</th>
+                <th>Qty</th>
+                <th>Supplier</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Classe</th>
+                <th>EOQ</th>
+                <th>Contrôle</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="poTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="audit" class="tab">
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="section-title">Journal d’audit</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type event</th>
+                  <th>Utilisateur</th>
+                  <th>Détails</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">Scénario test UAT — 5 cas</h3>
+          <div class="uat-grid" id="uatCards"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="tab">
+      <div class="card">
+        <h3 class="section-title">TO-BE — Workflow achats intelligent</h3>
         <div class="swimlanes">
           <div class="lane">
             <h4>MAGASINIER</h4>
             <div class="uml-start"></div>
-            <div class="uml-node">Consulter / saisir l’article</div>
+            <div class="uml-node">Consulter / saisir article</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node">Mettre à jour stock, transit, réservé</div>
+            <div class="uml-node">Mettre à jour stock / transit / réservé</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node green">Déclencher le contrôle BNMP</div>
+            <div class="uml-node green">Déclencher contrôle BNMP</div>
           </div>
 
           <div class="lane">
             <h4>SYSTÈME</h4>
-            <div class="uml-node">Calculer Net = stock + transit − réservé</div>
+            <div class="uml-node">Calculer Net disponible</div>
             <div class="uml-arrow">↓</div>
-            <div class="decision"><span>Net ≥ seuil min ?</span></div>
+            <div class="decision"><span>Net &lt; seuil ?</span></div>
             <div class="uml-arrow">Oui ↓</div>
-            <div class="uml-node green">Statut : OK</div>
-            <div class="uml-arrow">Non ↓</div>
-            <div class="uml-node red">Créer Demande achat (PO Draft)</div>
+            <div class="uml-node red">Vérifier classe A et fournisseur actif</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node orange">Calculer quantité suggérée</div>
+            <div class="uml-node orange">Créer PO Brouillon + tâche validation</div>
+            <div class="uml-arrow">↓</div>
+            <div class="uml-node">Journaliser l’événement</div>
           </div>
 
           <div class="lane">
             <h4>ACHETEUR</h4>
-            <div class="uml-node">Consulter le message généré</div>
+            <div class="uml-node">Consulter la demande générée</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node">Valider la demande d’achat</div>
+            <div class="uml-node">Valider / envoyer / recevoir / clôturer</div>
             <div class="uml-arrow">↓</div>
-            <div class="uml-node green">Décision d’approvisionnement</div>
+            <div class="uml-node green">Contrôle final et traçabilité</div>
             <div class="uml-arrow">↓</div>
             <div class="uml-end"></div>
           </div>
-        </div>
-
-        <div class="note-box" style="margin-top:16px;">
-          <strong>Correspondance avec l’énoncé :</strong><br>
-          - Swimlanes simplifiées : <strong>Magasinier / Système / Acheteur</strong><br>
-          - BNMP : <strong>Net = stock physique + transit − réservé</strong><br>
-          - Statuts : <strong>OK</strong> si Net ≥ seuil minimum, sinon <strong>À commander</strong><br>
-          - Génération automatique : création d’une <strong>Demande d’achat (PO Draft)</strong>
         </div>
       </div>
     </section>
@@ -931,54 +927,89 @@
 
   <script>
     let articles = [];
-    let editingIndex = null;
+    let suppliers = [];
+    let purchaseOrders = [];
+    let auditLogs = [];
+    let articleEditingIndex = null;
+    let supplierEditingIndex = null;
 
     let charts = {
       status: null,
       abc: null,
-      category: null,
+      po: null,
       trs: null
     };
 
-    const sampleData = [
+    const currentUser = "Paul";
+
+    const sampleArticles = [
       {
-        sku:"SAFE-00292", description:"RJ45 Connector", category:"SAFE", uom:"UN",
-        supplier_id:"SUP-12", supplier_status:"actif", lead_time_days:5,
-        unit_cost:9.5, annual_demand_D:1200, daily_consumption:4.8,
-        order_cost_S:55, holding_cost_H:2.2, safety_stock:18, reorder_point:35,
-        seuil_min:28, stock_physical:4, in_transit:6, reserved:12,
-        demand_variability_score:0.31, XYZ_class:"Y"
+        sku: "SAFE-00292", description: "RJ45 Connector", category: "SAFE", uom: "UN",
+        supplier_id: "SUP-12", supplier_status: "actif", lead_time_days: 5,
+        unit_cost: 9.5, annual_demand_D: 1200, daily_consumption: 4.8,
+        order_cost_S: 55, holding_cost_H: 2.2, safety_stock: 18, reorder_point: 35,
+        seuil_min: 28, stock_physical: 4, in_transit: 6, reserved: 12,
+        demand_variability_score: 0.31, XYZ_class: "Y"
       },
       {
-        sku:"FOOD-00097", description:"Bubble Wrap", category:"FOOD", uom:"UN",
-        supplier_id:"SUP-05", supplier_status:"actif", lead_time_days:7,
-        unit_cost:4.2, annual_demand_D:2800, daily_consumption:10.7,
-        order_cost_S:42, holding_cost_H:1.4, safety_stock:25, reorder_point:56,
-        seuil_min:40, stock_physical:95, in_transit:14, reserved:22,
-        demand_variability_score:0.18, XYZ_class:"X"
+        sku: "FOOD-00097", description: "Bubble Wrap", category: "FOOD", uom: "UN",
+        supplier_id: "SUP-05", supplier_status: "actif", lead_time_days: 7,
+        unit_cost: 4.2, annual_demand_D: 2800, daily_consumption: 10.7,
+        order_cost_S: 42, holding_cost_H: 1.4, safety_stock: 25, reorder_point: 56,
+        seuil_min: 40, stock_physical: 95, in_transit: 14, reserved: 22,
+        demand_variability_score: 0.18, XYZ_class: "X"
       },
       {
-        sku:"TOOL-00289", description:"Shelf Label", category:"TOOL", uom:"UN",
-        supplier_id:"SUP-09", supplier_status:"actif", lead_time_days:4,
-        unit_cost:16, annual_demand_D:500, daily_consumption:1.9,
-        order_cost_S:60, holding_cost_H:3.5, safety_stock:10, reorder_point:22,
-        seuil_min:18, stock_physical:12, in_transit:0, reserved:21,
-        demand_variability_score:0.42, XYZ_class:"Z"
+        sku: "TOOL-00289", description: "Shelf Label", category: "TOOL", uom: "UN",
+        supplier_id: "SUP-09", supplier_status: "actif", lead_time_days: 4,
+        unit_cost: 16, annual_demand_D: 500, daily_consumption: 1.9,
+        order_cost_S: 60, holding_cost_H: 3.5, safety_stock: 10, reorder_point: 22,
+        seuil_min: 18, stock_physical: 12, in_transit: 0, reserved: 21,
+        demand_variability_score: 0.42, XYZ_class: "Z"
+      },
+      {
+        sku: "MRO-00252", description: "Zip Ties", category: "MRO", uom: "UN",
+        supplier_id: "SUP-03", supplier_status: "inactif", lead_time_days: 10,
+        unit_cost: 14, annual_demand_D: 900, daily_consumption: 3.4,
+        order_cost_S: 65, holding_cost_H: 2.8, safety_stock: 16, reorder_point: 31,
+        seuil_min: 26, stock_physical: 7, in_transit: 2, reserved: 14,
+        demand_variability_score: 0.24, XYZ_class: "Y"
       }
+    ];
+
+    const sampleSuppliers = [
+      { supplier_id: "SUP-12", nom: "Tech Connect Supply", delai_moyen_jours: 5, statut: "actif", taux_conformite: 98 },
+      { supplier_id: "SUP-05", nom: "PackPlus Distribution", delai_moyen_jours: 7, statut: "actif", taux_conformite: 95 },
+      { supplier_id: "SUP-09", nom: "Warehouse Label Inc.", delai_moyen_jours: 4, statut: "actif", taux_conformite: 96 },
+      { supplier_id: "SUP-03", nom: "FastMRO Global", delai_moyen_jours: 10, statut: "inactif", taux_conformite: 89 }
     ];
 
     const el = id => document.getElementById(id);
 
-    function toNumber(v, fallback=0){
+    function toNumber(v, fallback = 0) {
       const n = Number(v);
       return Number.isFinite(n) ? n : fallback;
     }
 
-    function round2(v){
+    function round2(v) {
       return Math.round((v + Number.EPSILON) * 100) / 100;
     }
 
-    function sanitizeRow(raw){
+    function todayStr() {
+      return new Date().toLocaleDateString("fr-CA");
+    }
+
+    function logEvent(type, details) {
+      auditLogs.unshift({
+        date: new Date().toLocaleString("fr-CA"),
+        type_event: type,
+        utilisateur: currentUser,
+        details
+      });
+      if (auditLogs.length > 300) auditLogs = auditLogs.slice(0, 300);
+    }
+
+    function sanitizeArticle(raw) {
       return {
         sku: String(raw.sku ?? "").trim(),
         description: String(raw.description ?? "").trim(),
@@ -999,154 +1030,253 @@
         in_transit: toNumber(raw.in_transit),
         reserved: toNumber(raw.reserved),
         demand_variability_score: toNumber(raw.demand_variability_score),
-        XYZ_class: String(raw.XYZ_class ?? "").trim().toUpperCase() || "X"
+        XYZ_class: String(raw.XYZ_class ?? "X").trim().toUpperCase() || "X"
       };
     }
 
-    function computeNet(item){
-      return toNumber(item.stock_physical) + toNumber(item.in_transit) - toNumber(item.reserved);
+    function sanitizeSupplier(raw) {
+      return {
+        supplier_id: String(raw.supplier_id ?? "").trim(),
+        nom: String(raw.nom ?? "").trim(),
+        delai_moyen_jours: toNumber(raw.delai_moyen_jours),
+        statut: String(raw.statut ?? "actif").trim() || "actif",
+        taux_conformite: toNumber(raw.taux_conformite, 95)
+      };
     }
 
-    function computeAnnualValue(item){
-      return round2(toNumber(item.unit_cost) * toNumber(item.annual_demand_D));
+    function computeNet(a) {
+      return toNumber(a.stock_physical) + toNumber(a.in_transit) - toNumber(a.reserved);
     }
 
-    function computeEOQ(item){
-      const D = toNumber(item.annual_demand_D);
-      const S = toNumber(item.order_cost_S);
-      const H = toNumber(item.holding_cost_H);
+    function computeAnnualValue(a) {
+      return round2(toNumber(a.unit_cost) * toNumber(a.annual_demand_D));
+    }
+
+    function computeEOQ(a) {
+      const D = toNumber(a.annual_demand_D);
+      const S = toNumber(a.order_cost_S);
+      const H = toNumber(a.holding_cost_H);
       if (D <= 0 || S <= 0 || H <= 0) return 0;
       return round2(Math.sqrt((2 * D * S) / H));
     }
 
-    function computeCoverage(item){
-      const daily = toNumber(item.daily_consumption);
-      const net = computeNet(item);
+    function computeCoverage(a) {
+      const daily = toNumber(a.daily_consumption);
       if (daily <= 0) return null;
-      return round2(net / daily);
+      return round2(computeNet(a) / daily);
     }
 
-    function computeQtySuggested(item){
-      const net = computeNet(item);
-      const safety = Math.max(toNumber(item.safety_stock), 5);
-      const seuil = toNumber(item.seuil_min);
-      const qty = Math.max(0, Math.ceil(seuil - net + safety));
-      return qty;
+    function computeQtySuggested(a) {
+      const net = computeNet(a);
+      const safety = Math.max(toNumber(a.safety_stock), 5);
+      const seuil = toNumber(a.seuil_min);
+      return Math.max(0, Math.ceil(seuil - net + safety));
     }
 
-    function computeBNMPStatus(item){
-      return computeNet(item) >= toNumber(item.seuil_min) ? "OK" : "À commander";
+    function computeBNMPStatus(a) {
+      return computeNet(a) >= toNumber(a.seuil_min) ? "OK" : "À commander";
     }
 
-    function normalizeAndEnrich(items){
-      const rows = items.map(sanitizeRow).filter(r => r.sku);
+    function enrichArticles(items) {
+      const rows = items.map(sanitizeArticle).filter(r => r.sku);
 
-      rows.forEach(row => {
-        row.net_available = computeNet(row);
-        row.annual_value = computeAnnualValue(row);
-        row.EOQ = computeEOQ(row);
-        row.coverage_days = computeCoverage(row);
-        row.BNMP_message = computeBNMPStatus(row);
-        row.qty_suggested = computeQtySuggested(row);
+      rows.forEach(r => {
+        r.net_available = computeNet(r);
+        r.annual_value = computeAnnualValue(r);
+        r.EOQ = computeEOQ(r);
+        r.coverage_days = computeCoverage(r);
+        r.BNMP_message = computeBNMPStatus(r);
+        r.qty_suggested = computeQtySuggested(r);
       });
 
-      const sorted = [...rows].sort((a,b) => b.annual_value - a.annual_value);
-      const totalAnnual = sorted.reduce((s,r) => s + r.annual_value, 0);
+      const sorted = [...rows].sort((a, b) => b.annual_value - a.annual_value);
+      const totalAnnual = sorted.reduce((s, r) => s + r.annual_value, 0);
 
       let cumulative = 0;
-      sorted.forEach(row => {
-        const share = totalAnnual > 0 ? row.annual_value / totalAnnual : 0;
+      sorted.forEach(r => {
+        const share = totalAnnual > 0 ? r.annual_value / totalAnnual : 0;
         cumulative += share;
-        if (cumulative <= 0.80) row.ABC_class = "A";
-        else if (cumulative <= 0.95) row.ABC_class = "B";
-        else row.ABC_class = "C";
-        row.cumulative_share = round2(cumulative * 100);
-        row.individual_share = round2(share * 100);
+        if (cumulative <= 0.80) r.ABC_class = "A";
+        else if (cumulative <= 0.95) r.ABC_class = "B";
+        else r.ABC_class = "C";
+        r.individual_share = round2(share * 100);
+        r.cumulative_share = round2(cumulative * 100);
       });
 
       return sorted;
     }
 
-    function setImportStatus(msg){
-      el("importStatus").innerHTML = msg;
+    function destroyChartIfExists(chart) {
+      if (chart && typeof chart.destroy === "function") chart.destroy();
     }
 
-    async function loadDefaultExcelFromRepo(){
-      try{
-        setImportStatus("Chargement automatique du fichier Excel du repo en cours...");
-        const response = await fetch("./warehouseops_dataset_350.xlsx");
-        if(!response.ok) throw new Error("Fichier non trouvé dans le dépôt.");
-        const arrayBuffer = await response.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, {type:"array"});
-        const sheetName = workbook.SheetNames[0];
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval:""});
-        articles = normalizeAndEnrich(rows);
-        renderAll();
-        setImportStatus(`✅ Fichier du repo chargé avec succès : <strong>${articles.length}</strong> lignes importées.`);
-      }catch(error){
-        setImportStatus(`⚠️ Chargement automatique impossible. Cause : ${error.message} — Tu peux importer le fichier manuellement via le bouton ci-dessus.`);
-      }
-    }
-
-    function loadSampleData(){
-      articles = normalizeAndEnrich(sampleData);
-      renderAll();
-      setImportStatus(`✅ Échantillon de démonstration chargé : <strong>${articles.length}</strong> lignes.`);
-    }
-
-    function importExcelFromInput(){
-      const file = el("excelFile").files[0];
-      if(!file){
-        setImportStatus("⚠️ Sélectionne d’abord un fichier Excel.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(evt){
-        try{
-          const data = evt.target.result;
-          const workbook = XLSX.read(data, {type:"array"});
-          const sheetName = workbook.SheetNames[0];
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval:""});
-          articles = normalizeAndEnrich(rows);
-          renderAll();
-          setImportStatus(`✅ Import réussi : <strong>${articles.length}</strong> lignes chargées depuis <strong>${file.name}</strong>.`);
-        }catch(error){
-          setImportStatus(`❌ Erreur d’import Excel : ${error.message}`);
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function bindTabs(){
+    function bindTabs() {
       document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-          document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
           btn.classList.add("active");
           el(btn.dataset.tab).classList.add("active");
         });
       });
     }
 
-    function renderKpis(){
+    function setImportStatus(msg) {
+      el("importStatus").innerHTML = msg;
+    }
+
+    async function loadDefaultExcelFromRepo() {
+      try {
+        setImportStatus("Chargement automatique du fichier Excel du repo en cours...");
+        const response = await fetch("./warehouseops_dataset_350.xlsx");
+        if (!response.ok) throw new Error("Fichier introuvable dans le dépôt.");
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+
+        articles = enrichArticles(rows);
+        syncSuppliersFromArticles();
+        rebuildAutomationFromScratch();
+        renderAll();
+
+        setImportStatus(`✅ Fichier du repo chargé avec succès : <strong>${articles.length}</strong> lignes importées.`);
+        logEvent("FILE_IMPORTED", `Import automatique du fichier repo : ${articles.length} lignes`);
+      } catch (error) {
+        setImportStatus(`⚠️ Chargement automatique impossible : ${error.message}. Utilise l’import manuel si besoin.`);
+      }
+    }
+
+    function loadSamples() {
+      articles = enrichArticles(sampleArticles);
+      suppliers = sampleSuppliers.map(sanitizeSupplier);
+      purchaseOrders = [];
+      auditLogs = [];
+      logEvent("SAMPLE_DATA_LOADED", "Chargement des données d’exemple");
+      rebuildAutomationFromScratch();
+      renderAll();
+      setImportStatus(`✅ Mini échantillon chargé : <strong>${articles.length}</strong> articles.`);
+    }
+
+    function importExcelFromInput() {
+      const file = el("excelFile").files[0];
+      if (!file) {
+        setImportStatus("⚠️ Sélectionne d’abord un fichier Excel.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const workbook = XLSX.read(evt.target.result, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+
+          articles = enrichArticles(rows);
+          syncSuppliersFromArticles();
+          rebuildAutomationFromScratch();
+          renderAll();
+
+          setImportStatus(`✅ Import réussi : <strong>${articles.length}</strong> lignes chargées depuis <strong>${file.name}</strong>.`);
+          logEvent("FILE_IMPORTED", `Import manuel du fichier ${file.name} : ${articles.length} lignes`);
+        } catch (error) {
+          setImportStatus(`❌ Erreur d’import Excel : ${error.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function syncSuppliersFromArticles() {
+      const map = new Map(suppliers.map(s => [s.supplier_id, s]));
+      articles.forEach(a => {
+        if (!a.supplier_id) return;
+        if (!map.has(a.supplier_id)) {
+          map.set(a.supplier_id, sanitizeSupplier({
+            supplier_id: a.supplier_id,
+            nom: `Fournisseur ${a.supplier_id}`,
+            delai_moyen_jours: a.lead_time_days || 0,
+            statut: a.supplier_status || "actif",
+            taux_conformite: 95
+          }));
+        }
+      });
+      suppliers = [...map.values()];
+    }
+
+    function findSupplierById(id) {
+      return suppliers.find(s => s.supplier_id === id) || null;
+    }
+
+    function getEffectiveSupplierStatus(article) {
+      const sup = findSupplierById(article.supplier_id);
+      return sup ? sup.statut : (article.supplier_status || "actif");
+    }
+
+    function generatePOId() {
+      return `PO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    }
+
+    function existingOpenPOForSku(sku) {
+      return purchaseOrders.find(po =>
+        po.sku === sku &&
+        ["Brouillon", "À valider", "Envoyé", "Reçu"].includes(po.statut)
+      );
+    }
+
+    function rebuildAutomationFromScratch() {
+      purchaseOrders = [];
+      articles.forEach(article => {
+        const supplierStatus = getEffectiveSupplierStatus(article);
+        const needsOrder =
+          article.ABC_class === "A" &&
+          article.net_available < article.seuil_min &&
+          supplierStatus === "actif";
+
+        if (needsOrder) {
+          const qtyBase = article.qty_suggested;
+          const maxNoValidation = article.EOQ > 0 ? article.EOQ * 2 : qtyBase * 2;
+          const requiresSpecialValidation = qtyBase > maxNoValidation;
+
+          const po = {
+            po_id: generatePOId(),
+            sku: article.sku,
+            qty: qtyBase,
+            supplier_id: article.supplier_id || "N/A",
+            date: todayStr(),
+            statut: "Brouillon",
+            abc_class: article.ABC_class,
+            eoq: article.EOQ,
+            requires_special_validation: requiresSpecialValidation,
+            control_message: requiresSpecialValidation
+              ? "Validation spéciale requise (qty > EOQ x 2)"
+              : "Contrôle standard OK"
+          };
+
+          purchaseOrders.unshift(po);
+          logEvent("PO_CREATED", `PO Brouillon auto créé pour ${article.sku}, qty=${po.qty}, supplier=${po.supplier_id}`);
+          logEvent("VALIDATION_TASK_CREATED", `Tâche de validation créée pour ${article.sku}`);
+        } else if (article.net_available < article.seuil_min && supplierStatus !== "actif") {
+          logEvent("ALERT_SUPPLIER_INACTIVE", `Alerte : ${article.sku} nécessite un approvisionnement mais le fournisseur ${article.supplier_id || "N/A"} est inactif`);
+        }
+      });
+    }
+
+    function renderKpis() {
       const total = articles.length;
       const ruptures = articles.filter(a => a.net_available < 0).length;
       const service = total ? round2((articles.filter(a => a.net_available >= a.seuil_min).length / total) * 100) : 0;
-      const validCoverages = articles.map(a => a.coverage_days).filter(v => v !== null && Number.isFinite(v));
-      const avgCoverage = validCoverages.length ? round2(validCoverages.reduce((s,v) => s+v, 0) / validCoverages.length) : 0;
+      const coverages = articles.map(a => a.coverage_days).filter(v => v !== null && Number.isFinite(v));
+      const coverage = coverages.length ? round2(coverages.reduce((s, v) => s + v, 0) / coverages.length) : 0;
+      const activePO = purchaseOrders.filter(po => ["Brouillon", "À valider", "Envoyé", "Reçu"].includes(po.statut)).length;
 
       el("kpiTotalSku").textContent = total;
       el("kpiRuptures").textContent = ruptures;
       el("kpiService").textContent = `${service}%`;
-      el("kpiCoverage").textContent = `${avgCoverage} j`;
+      el("kpiCoverage").textContent = `${coverage} j`;
+      el("kpiActivePO").textContent = activePO;
     }
 
-    function destroyChartIfExists(instance){
-      if(instance && typeof instance.destroy === "function") instance.destroy();
-    }
-
-    function renderCharts(){
+    function renderCharts() {
       const okCount = articles.filter(a => a.BNMP_message === "OK").length;
       const alertCount = articles.filter(a => a.BNMP_message === "À commander").length;
 
@@ -1161,11 +1291,7 @@
             borderWidth: 0
           }]
         },
-        options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{legend:{position:"bottom"}}
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
       });
 
       const abcCounts = {
@@ -1180,133 +1306,96 @@
         data: {
           labels: ["Classe A", "Classe B", "Classe C"],
           datasets: [{
-            label: "Nombre de SKU",
             data: [abcCounts.A, abcCounts.B, abcCounts.C],
             backgroundColor: ["#2f80c0", "#f39c12", "#95a5a6"],
             borderRadius: 8
           }]
         },
-        options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{y:{beginAtZero:true}}
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
 
-      const categoryMap = {};
-      articles.forEach(a => {
-        const key = a.category || "Non classé";
-        categoryMap[key] = (categoryMap[key] || 0) + 1;
-      });
-      const topCategories = Object.entries(categoryMap)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0,8);
+      const statuses = ["Brouillon", "À valider", "Envoyé", "Reçu", "Clos"];
+      const poStatusCounts = statuses.map(s => purchaseOrders.filter(po => po.statut === s).length);
 
-      destroyChartIfExists(charts.category);
-      charts.category = new Chart(el("categoryChart"), {
+      destroyChartIfExists(charts.po);
+      charts.po = new Chart(el("poChart"), {
         type: "bar",
         data: {
-          labels: topCategories.map(x => x[0]),
+          labels: statuses,
           datasets: [{
-            label: "SKU",
-            data: topCategories.map(x => x[1]),
-            backgroundColor: "#3b9ae1",
+            data: poStatusCounts,
+            backgroundColor: ["#f39c12", "#8e44ad", "#2f80c0", "#2fbf71", "#34495e"],
             borderRadius: 8
           }]
         },
-        options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{y:{beginAtZero:true}}
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
       });
     }
 
-    function renderSummary(){
-      const total = articles.length;
+    function renderSummary() {
       const alerts = articles.filter(a => a.BNMP_message === "À commander");
-      const ruptureCount = articles.filter(a => a.net_available < 0).length;
       const classAAlerts = alerts.filter(a => a.ABC_class === "A").length;
-      const inactiveSupplierAlerts = alerts.filter(a => String(a.supplier_status).toLowerCase() !== "actif").length;
+      const inactiveSuppliers = suppliers.filter(s => s.statut === "inactif").length;
+      const blockedPO = purchaseOrders.filter(po => po.requires_special_validation).length;
 
       el("summaryBox").innerHTML = `
-        <strong>Synthèse d’avancement :</strong><br><br>
-        - <strong>${total}</strong> SKU sont actuellement chargés dans l’application.<br>
-        - <strong>${alerts.length}</strong> articles sont à commander selon la règle BNMP.<br>
-        - <strong>${ruptureCount}</strong> articles sont en rupture réelle (Net &lt; 0).<br>
-        - <strong>${classAAlerts}</strong> alertes concernent des articles critiques de classe A.<br>
-        - <strong>${inactiveSupplierAlerts}</strong> alertes concernent un fournisseur potentiellement inactif.<br><br>
-        <strong>Lecture métier :</strong> cette version fournit déjà un vrai socle décisionnel pour le pilotage du stock et prépare directement l’automatisation du workflow achats de l’exercice 3.
+        <strong>Lecture métier :</strong><br><br>
+        - <strong>${alerts.length}</strong> articles sont à commander selon BNMP.<br>
+        - <strong>${classAAlerts}</strong> de ces alertes concernent des articles critiques de classe A.<br>
+        - <strong>${purchaseOrders.length}</strong> PO ont été générés ou suivis dans le workflow achats.<br>
+        - <strong>${inactiveSuppliers}</strong> fournisseurs sont actuellement inactifs.<br>
+        - <strong>${blockedPO}</strong> PO demandent une validation spéciale car la quantité dépasse le garde-fou défini.<br><br>
+        Cette version couvre le pilotage stock, l’automatisation métier, la traçabilité et la simulation d’un workflow achats mature.
       `;
     }
 
-    function renderPODrafts(){
-      const drafts = articles
-        .filter(a => a.BNMP_message === "À commander")
-        .map(a => ({
-          sku: a.sku,
-          description: a.description,
-          qty: a.qty_suggested,
-          date: new Date().toLocaleDateString("fr-CA"),
-          status: "Brouillon",
-          supplier: a.supplier_id || "N/A",
-          abc: a.ABC_class
-        }));
-
-      if(!drafts.length){
-        el("poDraftList").innerHTML = `<div class="legend-note">Aucune demande d’achat à générer pour l’instant.</div>`;
+    function renderPODraftCards() {
+      const drafts = purchaseOrders.filter(po => po.statut === "Brouillon");
+      if (!drafts.length) {
+        el("poDraftCards").innerHTML = `<div class="note-box">Aucun PO Brouillon actif.</div>`;
         return;
       }
 
-      el("poDraftList").innerHTML = drafts.map(d => `
-        <div class="po-card">
-          <h4>PO Draft — ${d.sku}</h4>
+      el("poDraftCards").innerHTML = drafts.map(po => `
+        <div class="mini-card">
+          <h4>${po.po_id}</h4>
           <div class="meta">
-            <div><strong>Description :</strong> ${d.description || "-"}</div>
-            <div><strong>Quantité suggérée :</strong> ${d.qty}</div>
-            <div><strong>Date :</strong> ${d.date}</div>
-            <div><strong>Statut :</strong> <span class="status-pill status-draft">${d.status}</span></div>
-            <div><strong>Supplier ID :</strong> ${d.supplier}</div>
-            <div><strong>Classe ABC :</strong> ${d.abc}</div>
+            <div><strong>SKU :</strong> ${po.sku}</div>
+            <div><strong>Quantité :</strong> ${po.qty}</div>
+            <div><strong>Supplier :</strong> ${po.supplier_id}</div>
+            <div><strong>Date :</strong> ${po.date}</div>
+            <div><strong>Statut :</strong> <span class="status-pill status-draft">${po.statut}</span></div>
+            <div><strong>Contrôle :</strong> ${po.control_message}</div>
           </div>
         </div>
       `).join("");
     }
 
-    function renderArticlesTable(){
-      const q = el("searchInput").value.trim().toLowerCase();
+    function renderArticlesTable() {
+      const q = el("searchArticle").value.trim().toLowerCase();
+      const filtered = articles.filter(a => `${a.sku} ${a.description} ${a.category}`.toLowerCase().includes(q));
 
-      const filtered = articles.filter(a => {
-        const blob = `${a.sku} ${a.description} ${a.category}`.toLowerCase();
-        return blob.includes(q);
-      });
-
-      el("articlesTableBody").innerHTML = filtered.map((a, index) => {
+      el("articlesTableBody").innerHTML = filtered.map(a => {
+        const po = existingOpenPOForSku(a.sku);
         const statusClass = a.BNMP_message === "OK" ? "status-ok" : "status-alert";
         const coverage = a.coverage_days === null ? "N/A" : `${a.coverage_days} j`;
-        const poLabel = a.BNMP_message === "À commander"
-          ? `<span class="status-pill status-draft">PO Draft (${a.qty_suggested})</span>`
-          : `<span class="mini">Aucune</span>`;
 
         return `
           <tr>
             <td><strong>${a.sku}</strong></td>
             <td>${a.description || "-"}</td>
             <td>${a.category || "-"}</td>
+            <td>${a.supplier_id || "-"}</td>
             <td>${a.stock_physical}</td>
             <td>${a.in_transit}</td>
             <td>${a.reserved}</td>
             <td><strong>${a.net_available}</strong></td>
             <td>${a.seuil_min}</td>
             <td><span class="status-pill ${statusClass}">${a.BNMP_message}</span></td>
-            <td>${a.daily_consumption || 0}</td>
             <td>${coverage}</td>
-            <td>${a.annual_value}</td>
             <td>${a.ABC_class}</td>
             <td>${a.EOQ}</td>
-            <td>${poLabel}</td>
+            <td>${po ? `<span class="status-pill status-draft">${po.statut}</span>` : "-"}</td>
             <td>
               <div class="actions">
                 <button class="btn btn-warning" onclick="editArticle('${a.sku.replace(/'/g, "\\'")}')">Modifier</button>
@@ -1315,20 +1404,10 @@
             </td>
           </tr>
         `;
-      }).join("");
-
-      if(!filtered.length){
-        el("articlesTableBody").innerHTML = `
-          <tr>
-            <td colspan="16" class="subtle">Aucun article correspondant à la recherche.</td>
-          </tr>
-        `;
-      }
+      }).join("") || `<tr><td colspan="15" class="subtle">Aucun article trouvé.</td></tr>`;
     }
 
-    function renderABCTable(){
-      const totalAnnualValue = articles.reduce((s,a) => s + a.annual_value, 0);
-
+    function renderABCTable() {
       el("abcTableBody").innerHTML = articles.map((a, idx) => {
         const suggestion = a.ABC_class === "A"
           ? "Priorité EOQ et suivi rapproché"
@@ -1342,7 +1421,7 @@
             <td><strong>${a.sku}</strong></td>
             <td>${a.description || "-"}</td>
             <td>${a.annual_value}</td>
-            <td>${totalAnnualValue > 0 ? a.individual_share : 0}%</td>
+            <td>${a.individual_share || 0}%</td>
             <td>${a.cumulative_share || 0}%</td>
             <td><strong>${a.ABC_class}</strong></td>
             <td>${a.annual_demand_D}</td>
@@ -1355,32 +1434,136 @@
       }).join("");
     }
 
-    function updateFormNote(text){
-      el("formNote").textContent = text;
+    function renderSuppliersTable() {
+      el("suppliersTableBody").innerHTML = suppliers.map(s => {
+        const linked = articles.filter(a => a.supplier_id === s.supplier_id).length;
+        const statusClass = s.statut === "actif" ? "status-ok" : "status-inactive";
+        return `
+          <tr>
+            <td><strong>${s.supplier_id}</strong></td>
+            <td>${s.nom}</td>
+            <td>${s.delai_moyen_jours} j</td>
+            <td><span class="status-pill ${statusClass}">${s.statut}</span></td>
+            <td>${s.taux_conformite}%</td>
+            <td>${linked}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-warning" onclick="editSupplier('${s.supplier_id.replace(/'/g, "\\'")}')">Modifier</button>
+                <button class="btn btn-danger" onclick="deleteSupplier('${s.supplier_id.replace(/'/g, "\\'")}')">Supprimer</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("") || `<tr><td colspan="7" class="subtle">Aucun fournisseur.</td></tr>`;
     }
 
-    function clearForm(){
+    function renderPOTable() {
+      el("poTableBody").innerHTML = purchaseOrders.map(po => {
+        let statusClass = "status-draft";
+        if (po.statut === "Envoyé" || po.statut === "Reçu") statusClass = "status-sent";
+        if (po.statut === "Clos") statusClass = "status-closed";
+        if (po.statut === "À valider") statusClass = "status-alert";
+
+        return `
+          <tr>
+            <td><strong>${po.po_id}</strong></td>
+            <td>${po.sku}</td>
+            <td>${po.qty}</td>
+            <td>${po.supplier_id}</td>
+            <td>${po.date}</td>
+            <td><span class="status-pill ${statusClass}">${po.statut}</span></td>
+            <td>${po.abc_class}</td>
+            <td>${po.eoq}</td>
+            <td>${po.control_message}</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-warning" onclick="advancePO('${po.po_id.replace(/'/g, "\\'")}')">Avancer</button>
+                <button class="btn btn-dark" onclick="closePO('${po.po_id.replace(/'/g, "\\'")}')">Clore</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("") || `<tr><td colspan="10" class="subtle">Aucun PO.</td></tr>`;
+    }
+
+    function renderAuditTable() {
+      el("auditTableBody").innerHTML = auditLogs.map(log => `
+        <tr>
+          <td>${log.date}</td>
+          <td><strong>${log.type_event}</strong></td>
+          <td>${log.utilisateur}</td>
+          <td>${log.details}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="4" class="subtle">Aucun événement journalisé.</td></tr>`;
+    }
+
+    function renderUAT() {
+      const case1 = purchaseOrders.some(po => po.statut === "Brouillon");
+      const case2 = (() => {
+        const skuCounts = {};
+        purchaseOrders
+          .filter(po => ["Brouillon", "À valider", "Envoyé", "Reçu"].includes(po.statut))
+          .forEach(po => skuCounts[po.sku] = (skuCounts[po.sku] || 0) + 1);
+        return Object.values(skuCounts).every(v => v <= 1);
+      })();
+      const case3 = auditLogs.some(log => log.type_event === "PO_CREATED");
+      const case4 = auditLogs.some(log => log.type_event === "ALERT_SUPPLIER_INACTIVE");
+      const case5 = purchaseOrders.every(po => ["Brouillon", "À valider", "Envoyé", "Reçu", "Clos"].includes(po.statut));
+
+      const cases = [
+        { title: "Cas 1", desc: "Création automatique d’un PO pour article A avec Net < seuil et fournisseur actif", pass: case1 },
+        { title: "Cas 2", desc: "Un seul PO brouillon / SKU tant qu’il n’est pas clos", pass: case2 },
+        { title: "Cas 3", desc: "Journalisation automatique des événements critiques", pass: case3 },
+        { title: "Cas 4", desc: "Blocage logique si fournisseur inactif", pass: case4 },
+        { title: "Cas 5", desc: "Workflow PO respecte les statuts autorisés", pass: case5 }
+      ];
+
+      el("uatCards").innerHTML = cases.map(c => `
+        <div class="mini-card">
+          <h4>${c.title}</h4>
+          <div class="meta">
+            <div>${c.desc}</div>
+            <div><strong>Résultat :</strong> <span class="status-pill ${c.pass ? "status-ok" : "status-alert"}">${c.pass ? "PASS" : "FAIL"}</span></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAll() {
+      articles = enrichArticles(articles);
+      renderKpis();
+      renderCharts();
+      renderSummary();
+      renderPODraftCards();
+      renderArticlesTable();
+      renderABCTable();
+      renderSuppliersTable();
+      renderPOTable();
+      renderAuditTable();
+      renderUAT();
+      calcTRS();
+    }
+
+    function clearArticleForm() {
       [
-        "fSku","fDescription","fCategory","fUom","fSupplierId","fLeadTime",
-        "fUnitCost","fAnnualDemand","fDailyConsumption","fOrderCost","fHoldingCost",
-        "fSafetyStock","fReorderPoint","fSeuilMin","fStockPhysical","fInTransit",
-        "fReserved","fVariability","fXyzClass"
+        "fSku", "fDescription", "fCategory", "fUom", "fSupplierId", "fLeadTime", "fUnitCost",
+        "fAnnualDemand", "fDailyConsumption", "fOrderCost", "fHoldingCost", "fSafetyStock",
+        "fReorderPoint", "fSeuilMin", "fStockPhysical", "fInTransit", "fReserved", "fVariability", "fXyzClass"
       ].forEach(id => {
         const input = el(id);
         if (!input) return;
         if (input.type === "number") input.value = 0;
         else input.value = "";
       });
-
       el("fUom").value = "UN";
       el("fSupplierStatus").value = "actif";
       el("fXyzClass").value = "X";
-      editingIndex = null;
-      updateFormNote("Mode ajout activé.");
+      articleEditingIndex = null;
+      el("formNote").textContent = "Mode ajout activé.";
     }
 
-    function getFormArticle(){
-      return sanitizeRow({
+    function getArticleFromForm() {
+      return sanitizeArticle({
         sku: el("fSku").value,
         description: el("fDescription").value,
         category: el("fCategory").value,
@@ -1404,38 +1587,37 @@
       });
     }
 
-    function saveArticle(){
-      const item = getFormArticle();
-      if(!item.sku){
-        updateFormNote("⚠️ Le SKU est obligatoire.");
+    function saveArticle() {
+      const item = getArticleFromForm();
+      if (!item.sku) {
+        el("formNote").textContent = "⚠️ Le SKU est obligatoire.";
         return;
       }
-
-      const exists = articles.some(a => a.sku === item.sku);
-      if(exists){
-        updateFormNote("⚠️ Ce SKU existe déjà. Utilise ‘Mettre à jour’ ou choisis un autre SKU.");
+      if (articles.some(a => a.sku === item.sku)) {
+        el("formNote").textContent = "⚠️ Ce SKU existe déjà.";
         return;
       }
 
       articles.push(item);
-      articles = normalizeAndEnrich(articles);
+      syncSuppliersFromArticles();
+      rebuildAutomationFromScratch();
       renderAll();
-      clearForm();
-      updateFormNote("✅ Article ajouté avec succès.");
+      clearArticleForm();
+      logEvent("ARTICLE_CREATED", `Article ${item.sku} ajouté`);
     }
 
-    function editArticle(sku){
+    function editArticle(sku) {
       const idx = articles.findIndex(a => a.sku === sku);
-      if(idx < 0) return;
+      if (idx < 0) return;
       const a = articles[idx];
-      editingIndex = idx;
+      articleEditingIndex = idx;
 
       el("fSku").value = a.sku;
       el("fDescription").value = a.description;
       el("fCategory").value = a.category;
       el("fUom").value = a.uom;
       el("fSupplierId").value = a.supplier_id;
-      el("fSupplierStatus").value = a.supplier_status || "actif";
+      el("fSupplierStatus").value = a.supplier_status;
       el("fLeadTime").value = a.lead_time_days;
       el("fUnitCost").value = a.unit_cost;
       el("fAnnualDemand").value = a.annual_demand_D;
@@ -1449,53 +1631,199 @@
       el("fInTransit").value = a.in_transit;
       el("fReserved").value = a.reserved;
       el("fVariability").value = a.demand_variability_score;
-      el("fXyzClass").value = a.XYZ_class || "X";
+      el("fXyzClass").value = a.XYZ_class;
 
-      updateFormNote(`Mode modification activé pour le SKU ${a.sku}.`);
+      el("formNote").textContent = `Mode modification activé pour ${a.sku}.`;
       document.querySelector('[data-tab="articles"]').click();
-      window.scrollTo({top: 0, behavior: "smooth"});
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function updateArticle(){
-      if(editingIndex === null){
-        updateFormNote("⚠️ Sélectionne d’abord un article à modifier.");
+    function updateArticle() {
+      if (articleEditingIndex === null) {
+        el("formNote").textContent = "⚠️ Sélectionne d’abord un article à modifier.";
         return;
       }
 
-      const item = getFormArticle();
-      if(!item.sku){
-        updateFormNote("⚠️ Le SKU est obligatoire.");
+      const item = getArticleFromForm();
+      if (!item.sku) {
+        el("formNote").textContent = "⚠️ Le SKU est obligatoire.";
         return;
       }
 
-      const duplicate = articles.some((a, idx) => idx !== editingIndex && a.sku === item.sku);
-      if(duplicate){
-        updateFormNote("⚠️ Un autre article possède déjà ce SKU.");
+      const duplicate = articles.some((a, idx) => idx !== articleEditingIndex && a.sku === item.sku);
+      if (duplicate) {
+        el("formNote").textContent = "⚠️ Un autre article possède déjà ce SKU.";
         return;
       }
 
-      articles[editingIndex] = item;
-      articles = normalizeAndEnrich(articles);
+      articles[articleEditingIndex] = item;
+      syncSuppliersFromArticles();
+      rebuildAutomationFromScratch();
       renderAll();
-      clearForm();
-      updateFormNote("✅ Article mis à jour avec succès.");
+      clearArticleForm();
+      logEvent("ARTICLE_UPDATED", `Article ${item.sku} mis à jour`);
     }
 
-    function deleteArticle(sku){
-      if(!confirm(`Supprimer l’article ${sku} ?`)) return;
+    function deleteArticle(sku) {
+      if (!confirm(`Supprimer l’article ${sku} ?`)) return;
       articles = articles.filter(a => a.sku !== sku);
-      articles = normalizeAndEnrich(articles);
+      purchaseOrders = purchaseOrders.filter(po => po.sku !== sku);
+      renderAll();
+      logEvent("ARTICLE_DELETED", `Article ${sku} supprimé`);
+    }
+
+    function clearSupplierForm() {
+      ["sId", "sName", "sLead", "sConformity"].forEach(id => {
+        const input = el(id);
+        if (!input) return;
+        if (input.type === "number") input.value = 0;
+        else input.value = "";
+      });
+      el("sStatus").value = "actif";
+      supplierEditingIndex = null;
+      el("supplierFormNote").textContent = "Mode ajout fournisseur.";
+    }
+
+    function getSupplierFromForm() {
+      return sanitizeSupplier({
+        supplier_id: el("sId").value,
+        nom: el("sName").value,
+        delai_moyen_jours: el("sLead").value,
+        statut: el("sStatus").value,
+        taux_conformite: el("sConformity").value
+      });
+    }
+
+    function saveSupplier() {
+      const s = getSupplierFromForm();
+      if (!s.supplier_id) {
+        el("supplierFormNote").textContent = "⚠️ Le Supplier ID est obligatoire.";
+        return;
+      }
+      if (suppliers.some(x => x.supplier_id === s.supplier_id)) {
+        el("supplierFormNote").textContent = "⚠️ Ce Supplier ID existe déjà.";
+        return;
+      }
+      suppliers.push(s);
+      renderAll();
+      clearSupplierForm();
+      logEvent("SUPPLIER_CREATED", `Fournisseur ${s.supplier_id} ajouté`);
+    }
+
+    function editSupplier(id) {
+      const idx = suppliers.findIndex(s => s.supplier_id === id);
+      if (idx < 0) return;
+      const s = suppliers[idx];
+      supplierEditingIndex = idx;
+
+      el("sId").value = s.supplier_id;
+      el("sName").value = s.nom;
+      el("sLead").value = s.delai_moyen_jours;
+      el("sStatus").value = s.statut;
+      el("sConformity").value = s.taux_conformite;
+
+      el("supplierFormNote").textContent = `Mode modification activé pour ${s.supplier_id}.`;
+      document.querySelector('[data-tab="suppliers"]').click();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updateSupplier() {
+      if (supplierEditingIndex === null) {
+        el("supplierFormNote").textContent = "⚠️ Sélectionne d’abord un fournisseur à modifier.";
+        return;
+      }
+
+      const s = getSupplierFromForm();
+      if (!s.supplier_id) {
+        el("supplierFormNote").textContent = "⚠️ Le Supplier ID est obligatoire.";
+        return;
+      }
+
+      const duplicate = suppliers.some((x, idx) => idx !== supplierEditingIndex && x.supplier_id === s.supplier_id);
+      if (duplicate) {
+        el("supplierFormNote").textContent = "⚠️ Un autre fournisseur possède déjà ce Supplier ID.";
+        return;
+      }
+
+      const oldId = suppliers[supplierEditingIndex].supplier_id;
+      suppliers[supplierEditingIndex] = s;
+
+      articles = articles.map(a => {
+        if (a.supplier_id === oldId) {
+          return {
+            ...a,
+            supplier_id: s.supplier_id,
+            supplier_status: s.statut,
+            lead_time_days: s.delai_moyen_jours
+          };
+        }
+        return a;
+      });
+
+      rebuildAutomationFromScratch();
+      renderAll();
+      clearSupplierForm();
+      logEvent("SUPPLIER_UPDATED", `Fournisseur ${oldId} mis à jour en ${s.supplier_id}`);
+    }
+
+    function deleteSupplier(id) {
+      const linked = articles.some(a => a.supplier_id === id);
+      if (linked) {
+        alert("Impossible de supprimer ce fournisseur : il est lié à un ou plusieurs articles.");
+        return;
+      }
+      if (!confirm(`Supprimer le fournisseur ${id} ?`)) return;
+      suppliers = suppliers.filter(s => s.supplier_id !== id);
+      renderAll();
+      logEvent("SUPPLIER_DELETED", `Fournisseur ${id} supprimé`);
+    }
+
+    function advancePO(poId) {
+      const po = purchaseOrders.find(x => x.po_id === poId);
+      if (!po) return;
+
+      if (po.requires_special_validation && po.statut === "Brouillon") {
+        po.statut = "À valider";
+        logEvent("PO_PENDING_SPECIAL_VALIDATION", `PO ${po.po_id} passe à "À valider" à cause du garde-fou quantité`);
+      } else if (po.statut === "Brouillon") {
+        po.statut = "À valider";
+        logEvent("PO_SUBMITTED", `PO ${po.po_id} soumise à validation`);
+      } else if (po.statut === "À valider") {
+        po.statut = "Envoyé";
+        logEvent("PO_APPROVED", `PO ${po.po_id} validée puis envoyée`);
+      } else if (po.statut === "Envoyé") {
+        po.statut = "Reçu";
+        logEvent("PO_RECEIVED", `PO ${po.po_id} reçue`);
+      } else if (po.statut === "Reçu") {
+        po.statut = "Clos";
+        logEvent("PO_CLOSED", `PO ${po.po_id} clôturée`);
+      }
+
       renderAll();
     }
 
-    function calcTRS(){
+    function closePO(poId) {
+      const po = purchaseOrders.find(x => x.po_id === poId);
+      if (!po) return;
+
+      if (po.statut !== "Reçu" && po.statut !== "Clos") {
+        alert("Une PO ne peut être clôturée que si elle est au statut Reçu ou déjà Clos.");
+        return;
+      }
+
+      po.statut = "Clos";
+      renderAll();
+      logEvent("PO_CLOSED", `PO ${po.po_id} clôturée manuellement`);
+    }
+
+    function calcTRS() {
       const planned = toNumber(el("trsPlan").value);
       const stops = toNumber(el("trsStops").value);
       const rate = toNumber(el("trsRate").value);
       const totalQty = toNumber(el("trsTotalQty").value);
       const badQty = toNumber(el("trsBadQty").value);
 
-      if(planned <= 0 || rate <= 0 || totalQty <= 0){
+      if (planned <= 0 || rate <= 0 || totalQty <= 0) {
         el("trsInterpretation").innerHTML = "⚠️ Vérifie les valeurs saisies : temps planifié, cadence et quantité totale doivent être strictement positifs.";
         return;
       }
@@ -1517,12 +1845,11 @@
 
       let weakest = "Disponibilité";
       let weakestValue = availability;
-
-      if(performance < weakestValue){
+      if (performance < weakestValue) {
         weakest = "Performance";
         weakestValue = performance;
       }
-      if(quality < weakestValue){
+      if (quality < weakestValue) {
         weakest = "Qualité";
         weakestValue = quality;
       }
@@ -1531,8 +1858,8 @@
         <strong>Interprétation :</strong><br>
         - Temps de fonctionnement : <strong>${operatingMinutes}</strong> min (${round2(operatingHours)} h)<br>
         - Quantité bonne : <strong>${goodQty}</strong><br>
-        - Le facteur le plus faible est : <strong>${weakest}</strong><br><br>
-        <strong>Lecture métier :</strong> si ${weakest.toLowerCase()} est la plus basse, c’est là que se situe la contrainte principale à traiter en priorité.
+        - Facteur le plus faible : <strong>${weakest}</strong><br><br>
+        <strong>Lecture métier :</strong> la principale contrainte à corriger se situe au niveau de <strong>${weakest.toLowerCase()}</strong>.
       `;
 
       destroyChartIfExists(charts.trs);
@@ -1548,28 +1875,17 @@
               round2(quality * 100),
               round2(trs * 100)
             ],
-            backgroundColor: ["#2f80c0","#f39c12","#2fbf71","#34495e"],
+            backgroundColor: ["#2f80c0", "#f39c12", "#2fbf71", "#34495e"],
             borderRadius: 10
           }]
         },
         options: {
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{y:{beginAtZero:true, max:140}}
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, max: 140 } }
         }
       });
-    }
-
-    function renderAll(){
-      articles = normalizeAndEnrich(articles);
-      renderKpis();
-      renderCharts();
-      renderSummary();
-      renderPODrafts();
-      renderArticlesTable();
-      renderABCTable();
-      calcTRS();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1577,20 +1893,29 @@
 
       el("btnImportExcel").addEventListener("click", importExcelFromInput);
       el("btnLoadDefault").addEventListener("click", loadDefaultExcelFromRepo);
-      el("btnResetSamples").addEventListener("click", loadSampleData);
+      el("btnLoadSamples").addEventListener("click", loadSamples);
 
       el("btnSaveArticle").addEventListener("click", saveArticle);
       el("btnUpdateArticle").addEventListener("click", updateArticle);
-      el("btnClearForm").addEventListener("click", clearForm);
-      el("btnCalcTRS").addEventListener("click", calcTRS);
-      el("searchInput").addEventListener("input", renderArticlesTable);
+      el("btnClearArticle").addEventListener("click", clearArticleForm);
+      el("searchArticle").addEventListener("input", renderArticlesTable);
 
-      loadSampleData();
+      el("btnSaveSupplier").addEventListener("click", saveSupplier);
+      el("btnUpdateSupplier").addEventListener("click", updateSupplier);
+      el("btnClearSupplier").addEventListener("click", clearSupplierForm);
+
+      el("btnCalcTRS").addEventListener("click", calcTRS);
+
+      loadSamples();
       loadDefaultExcelFromRepo();
     });
 
     window.editArticle = editArticle;
     window.deleteArticle = deleteArticle;
+    window.editSupplier = editSupplier;
+    window.deleteSupplier = deleteSupplier;
+    window.advancePO = advancePO;
+    window.closePO = closePO;
   </script>
 </body>
 </html>
