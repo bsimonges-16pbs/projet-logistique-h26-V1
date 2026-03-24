@@ -2,267 +2,97 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>SIAG - Dashboard Logistique</title>
-
+<title>SIAG - Dashboard Avancé</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
-body {
-    font-family: 'Segoe UI';
-    margin:0;
-    background:#f5f7fa;
-}
-
-header {
-    background:linear-gradient(90deg,#2c3e50,#3498db);
-    color:white;
-    padding:15px;
-    text-align:center;
-}
-
-nav {
-    display:flex;
-    background:#2c3e50;
-}
-
-nav button {
-    flex:1;
-    padding:15px;
-    border:none;
-    background:#2c3e50;
-    color:white;
-    cursor:pointer;
-}
-
-nav button:hover {
-    background:#34495e;
-}
-
-.container {
-    padding:20px;
-}
-
-.card {
-    background:white;
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:20px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.1);
-}
-
-table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td {
-    padding:10px;
-    border-bottom:1px solid #ddd;
-    text-align:center;
-}
-
-.ok {color:#2ecc71; font-weight:bold;}
-.alert {color:#e74c3c; font-weight:bold;}
-
-button {
-    padding:8px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.add {background:#2ecc71;color:white;}
-.delete {background:#e74c3c;color:white;}
-
-input {
-    padding:8px;
-    margin:5px;
-}
-
-/* UML EXPERT */
-.uml-wrapper {
-    display:flex;
-    gap:20px;
-}
-
-.uml-box {
-    flex:1;
-    background:#ecf0f1;
-    padding:15px;
-    border-radius:12px;
-}
-
-.lane {
-    background:white;
-    padding:10px;
-    margin:10px 0;
-    border-radius:10px;
-}
-
-.node {
-    padding:10px;
-    margin:8px;
-    border-radius:8px;
-    text-align:center;
-    background:#3498db;
-    color:white;
-}
-
-.decision {
-    background:#f39c12;
-    transform:rotate(45deg);
-    width:120px;
-    height:120px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:auto;
-}
-
-.decision span {
-    transform:rotate(-45deg);
-    color:white;
-}
-
-.start, .end {
-    width:20px;
-    height:20px;
-    border-radius:50%;
-    margin:auto;
-}
-
-.start {background:black;}
-.end {background:black;}
-
-.arrow {
-    text-align:center;
-    font-size:20px;
-}
-
+body {font-family:Segoe UI; margin:0; background:#f5f7fa;}
+header {background:linear-gradient(90deg,#2c3e50,#3498db);color:white;padding:15px;text-align:center;}
+nav {display:flex;background:#2c3e50;}
+nav button {flex:1;padding:15px;border:none;color:white;background:#2c3e50;cursor:pointer;}
+nav button:hover {background:#34495e;}
+.container {padding:20px;}
+.card {background:white;padding:15px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.ok{color:#2ecc71;font-weight:bold;}
+.alert{color:#e74c3c;font-weight:bold;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;}
+.kpi{padding:20px;border-radius:10px;color:white;text-align:center;}
+.kpi1{background:#3498db;}
+.kpi2{background:#e74c3c;}
+.kpi3{background:#2ecc71;}
 </style>
-
 </head>
 
 <body>
 
 <header>
-<h1>📦 SIAG - Dashboard Logistique Intelligent</h1>
+<h1>📊 SIAG - Pilotage Performance</h1>
 </header>
 
 <nav>
-<button onclick="showTab('articles')">Articles</button>
 <button onclick="showTab('dashboard')">Dashboard</button>
-<button onclick="showTab('process')">Processus UML</button>
+<button onclick="showTab('trs')">TRS</button>
+<button onclick="showTab('abc')">ABC / EOQ</button>
 </nav>
 
 <div class="container">
 
-<!-- ARTICLES -->
-<div id="articles" class="tab">
+<!-- DASHBOARD KPI -->
+<div id="dashboard" class="tab">
+<div class="grid">
 
-<div class="card">
-<h3>Ajouter Article</h3>
+<div class="kpi kpi1">
+<h2 id="total"></h2>
+<p>Total SKU</p>
+</div>
 
-<input id="sku" placeholder="SKU">
-<input id="stock" type="number" placeholder="Stock">
-<input id="transit" type="number" placeholder="Transit">
-<input id="reserve" type="number" placeholder="Réservé">
-<input id="seuil" type="number" placeholder="Seuil">
+<div class="kpi kpi2">
+<h2 id="rupture"></h2>
+<p>Ruptures</p>
+</div>
 
-<button class="add" onclick="addArticle()">Ajouter</button>
+<div class="kpi kpi3">
+<h2 id="service"></h2>
+<p>Taux Service</p>
+</div>
+
 </div>
 
 <div class="card">
-<h3>Liste</h3>
+<canvas id="kpiChart"></canvas>
+</div>
+</div>
 
-<table>
+<!-- TRS -->
+<div id="trs" class="tab" style="display:none;">
+<div class="card">
+
+<h3>Calcul TRS</h3>
+
+<input id="tp" placeholder="Temps planifié">
+<input id="arret" placeholder="Arrêts">
+<input id="cadence" placeholder="Cadence/h">
+<input id="qt" placeholder="Quantité totale">
+<input id="qb" placeholder="Quantité bonne">
+
+<button onclick="calcTRS()">Calculer</button>
+
+<p id="trsResult"></p>
+
+</div>
+</div>
+
+<!-- ABC -->
+<div id="abc" class="tab" style="display:none;">
+<div class="card">
+<h3>ABC + EOQ</h3>
+
+<table id="abcTable">
 <thead>
-<tr>
-<th>SKU</th><th>Stock</th><th>Transit</th><th>Réservé</th>
-<th>Net</th><th>Seuil</th><th>Statut</th><th>PO</th><th></th>
-</tr>
+<tr><th>SKU</th><th>Valeur</th><th>Classe</th><th>EOQ</th></tr>
 </thead>
-<tbody id="table"></tbody>
+<tbody></tbody>
 </table>
-
-</div>
-
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="tab" style="display:none;">
-<div class="card">
-<h3>KPI</h3>
-<p>Total: <span id="total"></span></p>
-<p>Alertes: <span id="alertCount"></span></p>
-</div>
-
-<div class="card">
-<canvas id="chart"></canvas>
-</div>
-</div>
-
-<!-- UML EXPERT -->
-<div id="process" class="tab" style="display:none;">
-<div class="card">
-
-<h2>🔴 AS-IS (Actuel)</h2>
-
-<div class="uml-wrapper">
-
-<div class="uml-box">
-<div class="lane">
-<div class="start"></div>
-<div class="node">Magasinier vérifie stock</div>
-<div class="arrow">⬇</div>
-<div class="node">Décision manuelle</div>
-<div class="arrow">⬇</div>
-<div class="end"></div>
-</div>
-</div>
-
-</div>
-
-<h2>🟢 TO-BE (Optimisé)</h2>
-
-<div class="uml-wrapper">
-
-<div class="uml-box">
-<h3>Magasinier</h3>
-<div class="lane">
-<div class="start"></div>
-<div class="node">Consulter article</div>
-</div>
-</div>
-
-<div class="uml-box">
-<h3>Système</h3>
-<div class="lane">
-<div class="node">Calcul BNMP</div>
-<div class="arrow">⬇</div>
-
-<div class="decision"><span>Net ≥ seuil ?</span></div>
-
-<div class="arrow">⬇ Oui</div>
-<div class="node" style="background:#2ecc71;">OK</div>
-
-<div class="arrow">⬇ Non</div>
-<div class="node" style="background:#e74c3c;">Créer PO Draft</div>
-
-</div>
-</div>
-
-<div class="uml-box">
-<h3>Acheteur</h3>
-<div class="lane">
-<div class="node">Valider commande</div>
-<div class="arrow">⬇</div>
-<div class="end"></div>
-</div>
-</div>
-
-</div>
 
 </div>
 </div>
@@ -271,85 +101,94 @@ input {
 
 <script>
 
-let articles = [
-{sku:"A100", stock:50, transit:10, reserve:30, seuil:40},
-{sku:"A200", stock:20, transit:5, reserve:30, seuil:25},
-{sku:"A300", stock:100, transit:0, reserve:20, seuil:50}
+// DATA
+let data = [
+{sku:"A", stock:50, transit:10, reserve:20, seuil:30, cost:10, demand:500, S:50, H:2},
+{sku:"B", stock:10, transit:0, reserve:20, seuil:15, cost:20, demand:200, S:40, H:3},
+{sku:"C", stock:80, transit:10, reserve:10, seuil:40, cost:5, demand:800, S:30, H:1}
 ];
 
-function net(a){
-return a.stock + a.transit - a.reserve;
-}
+function net(a){return a.stock+a.transit-a.reserve;}
 
-function addArticle(){
-articles.push({
-sku:sku.value,
-stock:+stock.value,
-transit:+transit.value,
-reserve:+reserve.value,
-seuil:+seuil.value
+function computeKPI(){
+
+let rupture=0, service=0;
+
+data.forEach(a=>{
+if(net(a)<0) rupture++;
+if(net(a)>=a.seuil) service++;
 });
-render();
+
+total.innerText=data.length;
+ruptureEl.innerText=rupture;
+service.innerText=Math.round(service/data.length*100)+"%";
+
+drawChart(rupture);
 }
 
-function render(){
+function drawChart(r){
+new Chart(kpiChart,{
+type:"bar",
+data:{
+labels:["OK","Rupture"],
+datasets:[{data:[data.length-r,r]}]
+}
+});
+}
+
+function calcTRS(){
+
+let tp=+tp.value;
+let ar=+arret.value;
+let cad=+cadence.value;
+let qt=+qt.value;
+let qb=+qb.value;
+
+let dispo=(tp-ar)/tp;
+let perf=qt/(cad*(tp-ar));
+let qual=qb/qt;
+
+let trs=dispo*perf*qual;
+
+trsResult.innerHTML="TRS = "+(trs*100).toFixed(2)+"%";
+}
+
+function computeABC(){
+
+let totalVal=0;
+
+data.forEach(a=>{
+a.value=a.cost*a.demand;
+totalVal+=a.value;
+});
+
+data.sort((a,b)=>b.value-a.value);
+
+let cum=0;
+
+data.forEach(a=>{
+cum+=a.value/totalVal;
+
+if(cum<=0.8) a.class="A";
+else if(cum<=0.95) a.class="B";
+else a.class="C";
+
+a.eoq=Math.sqrt((2*a.demand*a.S)/a.H).toFixed(0);
+});
 
 let html="";
-let alertCount=0;
 
-articles.forEach((a,i)=>{
-
-let n=net(a);
-let status=n>=a.seuil?"OK":"À commander";
-
-let po = "";
-
-if(status==="À commander"){
-alertCount++;
-let qty = a.seuil - n + 5;
-po = "PO Draft ("+qty+")";
-}
-
-html+=`
-<tr>
+data.forEach(a=>{
+html+=`<tr>
 <td>${a.sku}</td>
-<td>${a.stock}</td>
-<td>${a.transit}</td>
-<td>${a.reserve}</td>
-<td>${n}</td>
-<td>${a.seuil}</td>
-<td class="${status==='OK'?'ok':'alert'}">${status}</td>
-<td>${po}</td>
-<td><button class="delete" onclick="del(${i})">X</button></td>
-</tr>
-`;
+<td>${a.value}</td>
+<td>${a.class}</td>
+<td>${a.eoq}</td>
+</tr>`;
 });
 
-table.innerHTML=html;
+abcTable.querySelector("tbody").innerHTML=html;
 
-total.innerText=articles.length;
-alertCountEl=alertCount;
-
-drawChart(alertCount);
-
-}
-
-function del(i){
-articles.splice(i,1);
-render();
-}
-
-function drawChart(alert){
-new Chart(chart,{
-type:"doughnut",
-data:{
-labels:["OK","Alerte"],
-datasets:[{
-data:[articles.length-alert,alert],
-backgroundColor:["#2ecc71","#e74c3c"]
-}]
-}
-});
 }
 
 function showTab(id){
@@ -357,7 +196,8 @@ document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
-render();
+computeKPI();
+computeABC();
 
 </script>
 
