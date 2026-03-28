@@ -1,0 +1,11 @@
+ID,Module,Scénario,Mode de validation,Résultat attendu / observé,Statut
+UAT-01,BNMP,Calcul du net disponible sur un SKU,Prototype HTML + dataset,La formule stock physique + transit − réservé restitue la bonne valeur et reste cohérente avec le dataset.,Pass
+UAT-02,BNMP,Classement automatique du statut,Prototype HTML + dataset,"Le statut bascule correctement entre OK, À commander et Stockout selon le net et le seuil minimum.",Pass
+UAT-03,Données,Import / export CSV du catalogue articles,Prototype HTML,Les données du catalogue peuvent être chargées et réexportées sans altérer les champs clés utilisés par BNMP.,Pass
+UAT-04,Achats,Scénario démo PO avec statuts multiples,Jeu de démonstration + règles,"Le kanban affiche au moins un brouillon, un à valider, un envoyé et un reçu pour soutenir la démo.",Pass
+UAT-05,Achats,Blocage d’auto-PO si fournisseur inactif,Simulation règles + dataset,"Le workflow refuse l’envoi automatique, crée une alerte et assigne une action au responsable achats.",Pass
+UAT-06,Exceptions,Chargement du registre des anomalies dans l’application,Revue de conformité,Le registre d’exceptions est exportable/importable depuis l’application stabilisée.,Pass
+UAT-07,Monitoring,Visualisation des alertes et du journal d’audit,Revue de conformité,"Le module Monitoring affiche les alertes, le registre, les 5 Why et le journal d’audit.",Pass
+UAT-08,KPI/TRS,Calcul et interprétation du levier principal,Calculateur TRS,Les jauges et les barres font ressortir la composante la plus faible pour la démo.,Pass
+UAT-09,UML,Export image ou zoom plein écran des schémas,Test exploratoire UI,"Les schémas sont lisibles et réalignés, mais l’export PNG / zoom natif n’est pas encore disponible dans cette itération.",Fail
+UAT-10,Achats,Anti-duplication multi-utilisateur temps réel,Test de robustesse,"Le contrôle anti-doublon fonctionne dans le navigateur courant, mais pas encore en contexte multi-utilisateur synchronisé.",Fail

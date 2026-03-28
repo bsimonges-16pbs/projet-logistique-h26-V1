@@ -1,0 +1,11 @@
+exception_id,date_detection,category,severity,owner,status,sku,action_taken,closure_reason,last_update
+EXC-001,2026-03-26,Stockout critique,Critical,Acheteur,Open,OFFC-00269,Créer PO urgent + confirmer disponibilité fournisseur actif,,2026-03-26
+EXC-002,2026-03-26,Blocage fournisseur,High,Responsable achats,In Analysis,ELEC-00310,Basculer vers source alternative ou escalade approvisionnement,,2026-03-26
+EXC-003,2026-03-26,Réservation anormale,High,Magasinier,Action in Progress,OFFC-00269,Vérifier réservations > stock physique et corriger les lignes obsolètes,,2026-03-26
+EXC-004,2026-03-26,Franchissement safety stock,Medium,Planificateur,Open,SAFE-00240,Revoir couverture court terme et ajuster proposition de commande,,2026-03-26
+EXC-005,2026-03-26,Aucune couverture transit,High,Acheteur,Resolved,PACK-00057,Expédition accélérée demandée; ASN reçu,Risque court terme maîtrisé,2026-03-26
+EXC-006,2026-03-26,Fournisseur inactif sur article A,High,Responsable achats,Open,SAFE-00292,Bloquer auto-PO et lancer validation sourcing,,2026-03-26
+EXC-007,2026-03-26,Lead time long article A,Medium,Planificateur,In Analysis,CABL-00161,Recalibrer seuil_min / safety stock,,2026-03-26
+EXC-008,2026-03-26,Sous couverture chronique,Medium,Analyste inventaire,Action in Progress,CABL-00344,Analyser fréquence des messages BNMP et ajuster paramètres,,2026-03-26
+EXC-009,2026-03-26,Écart d’audit potentiel,Medium,Chef d’équipe entrepôt,Open,MECH-00212,Contrôle terrain ciblé et recomptage,,2026-03-26
+EXC-010,2026-03-26,Exception clôturée,Low,Acheteur,Closed,TOOL-00056,"PO reçu, stock mis à jour et journal validé",PO 100 % réceptionné,2026-03-26

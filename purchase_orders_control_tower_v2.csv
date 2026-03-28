@@ -1,0 +1,5 @@
+po_id,sku,supplier_id,qty,priority,status,created_at,note
+PO-DEMO-1,MECH-00124,SUP001,6,Standard,Brouillon,2026-03-28,Scénario démo : proposition standard en attente de revue.
+PO-DEMO-2,OFFC-00269,SUP014,205,Urgent,À valider,2026-03-28,Scénario démo : stockout article A/X à arbitrer.
+PO-DEMO-3,SAFE-00170,SUP004,21,Urgent,Envoyé,2026-03-28,Scénario démo : commande transmise au fournisseur.
+PO-DEMO-4,ELEC-00165,SUP010,8,Standard,Reçu,2026-03-28,"Scénario démo : réception faite, clôture à auditer."
